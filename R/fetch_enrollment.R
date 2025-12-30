@@ -10,16 +10,18 @@
 #' Fetch Texas enrollment data
 #'
 #' Downloads and processes enrollment data from the Texas Education Agency
-#' PEIMS data files.
+#' PEIMS data files via the TAPR (Texas Academic Performance Reports) system.
 #'
 #' @param end_year A school year. Year is the end of the academic year - eg 2023-24
-#'   school year is year '2024'. Valid values are 2010-2025 (some years may have
+#'   school year is year '2024'. Valid values are 2013-2025 (some years may have
 #'   limited data or different formats).
 #' @param tidy If TRUE (default), returns data in long (tidy) format with subgroup
 #'   column. If FALSE, returns wide format.
 #' @param use_cache If TRUE (default), uses locally cached data when available.
 #'   Set to FALSE to force re-download from TEA.
-#' @return Data frame with enrollment data
+#' @return Data frame with enrollment data. Wide format includes columns for
+#'   district_id, campus_id, names, and enrollment counts by demographic/grade.
+#'   Tidy format pivots these counts into subgroup and grade_level columns.
 #' @export
 #' @examples
 #' \dontrun{
@@ -31,24 +33,85 @@
 #'
 #' # Force fresh download (ignore cache)
 #' enr_fresh <- fetch_enr(2024, use_cache = FALSE)
+#'
+#' # Filter to specific district
+#' austin_isd <- enr_2024 %>%
+#'   dplyr::filter(district_id == "101912")
 #' }
 fetch_enr <- function(end_year, tidy = TRUE, use_cache = TRUE) {
 
- # TODO: Implement fetch_enr for Texas
- #
- # Key differences from Illinois:
- # - Texas uses 6-digit district IDs and 9-digit campus IDs
- # - Data comes from PEIMS (Public Education Information Management System)
- # - TEA data portal: https://tea.texas.gov/reports-and-data
- #
- # Implementation steps:
- # 1. Validate year parameter
- # 2. Check cache if use_cache = TRUE
- # 3. Call get_raw_enr() to download data
- # 4. Call process_enr() to standardize schema
- # 5. If tidy = TRUE, call tidy_enr() and id_enr_aggs()
- # 6. Write to cache if use_cache = TRUE
- # 7. Return processed data
+  # Validate year - TAPR data available from 2013 onwards
+  if (end_year < 2013 || end_year > 2025) {
+    stop("end_year must be between 2013 and 2025")
+  }
 
- stop("fetch_enr() not yet implemented for Texas data")
+  # Determine cache type based on tidy parameter
+  cache_type <- if (tidy) "tidy" else "wide"
+
+  # Check cache first
+  if (use_cache && cache_exists(end_year, cache_type)) {
+    message(paste("Using cached data for", end_year))
+    return(read_cache(end_year, cache_type))
+  }
+
+  # Get raw data from TEA
+  raw <- get_raw_enr(end_year)
+
+  # Process to standard schema
+  processed <- process_enr(raw, end_year)
+
+  # Optionally tidy
+  if (tidy) {
+    processed <- tidy_enr(processed) %>%
+      id_enr_aggs()
+  }
+
+  # Cache the result
+  if (use_cache) {
+    write_cache(processed, end_year, cache_type)
+  }
+
+  processed
+}
+
+
+#' Fetch enrollment data for multiple years
+#'
+#' Downloads and combines enrollment data for multiple school years.
+#'
+#' @param end_years Vector of school year ends (e.g., c(2022, 2023, 2024))
+#' @param tidy If TRUE (default), returns data in long (tidy) format.
+#' @param use_cache If TRUE (default), uses locally cached data when available.
+#' @return Combined data frame with enrollment data for all requested years
+#' @export
+#' @examples
+#' \dontrun{
+#' # Get 3 years of data
+#' enr_multi <- fetch_enr_multi(2022:2024)
+#'
+#' # Track enrollment trends
+#' enr_multi %>%
+#'   dplyr::filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") %>%
+#'   dplyr::select(end_year, n_students)
+#' }
+fetch_enr_multi <- function(end_years, tidy = TRUE, use_cache = TRUE) {
+
+  # Validate years
+  invalid_years <- end_years[end_years < 2013 | end_years > 2025]
+  if (length(invalid_years) > 0) {
+    stop(paste("Invalid years:", paste(invalid_years, collapse = ", "),
+               "\nend_year must be between 2013 and 2025"))
+  }
+
+  # Fetch each year
+  results <- purrr::map(
+    end_years,
+    function(yr) {
+      message(paste("Fetching", yr, "..."))
+      fetch_enr(yr, tidy = tidy, use_cache = use_cache)
+    }
+  )
+
+  # Combine
+  dplyr::bind_rows(results)
 }

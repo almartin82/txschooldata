@@ -14,19 +14,119 @@
 #' @param df A wide data.frame of processed enrollment data
 #' @return A long data.frame of tidied enrollment data
 #' @export
+#' @examples
+#' \dontrun{
+#' wide_data <- fetch_enr(2024, tidy = FALSE)
+#' tidy_data <- tidy_enr(wide_data)
+#' }
 tidy_enr <- function(df) {
 
-  # TODO: Implement tidy_enr for Texas
-  #
-  # This should follow the same pattern as ilschooldata:
-  # 1. Define invariant columns (IDs, names)
-  # 2. Define demographic subgroup columns to pivot
-  # 3. Define special population columns to pivot
-  # 4. Define grade-level columns to pivot
-  # 5. Use purrr::map_df to create tidy rows for each subgroup
-  # 6. Combine and filter NA values
+  # Invariant columns (identifiers that stay the same)
+  invariants <- c(
+    "end_year", "type",
+    "district_id", "campus_id",
+    "district_name", "campus_name",
+    "county", "region", "charter_flag"
+  )
+  invariants <- invariants[invariants %in% names(df)]
 
-  stop("tidy_enr() not yet implemented for Texas data")
+  # Demographic subgroups to tidy
+  demo_cols <- c(
+    "white", "black", "hispanic", "asian",
+    "native_american", "pacific_islander", "multiracial"
+  )
+  demo_cols <- demo_cols[demo_cols %in% names(df)]
+
+  # Special population subgroups
+  special_cols <- c(
+    "special_ed", "lep", "econ_disadv"
+  )
+  special_cols <- special_cols[special_cols %in% names(df)]
+
+  # Grade-level columns
+  grade_cols <- grep("^grade_", names(df), value = TRUE)
+
+  all_subgroups <- c(demo_cols, special_cols)
+
+  # Transform demographic/special subgroups to long format
+  if (length(all_subgroups) > 0) {
+    tidy_subgroups <- purrr::map_df(
+      all_subgroups,
+      function(.x) {
+        df %>%
+          dplyr::rename(n_students = dplyr::all_of(.x)) %>%
+          dplyr::select(dplyr::all_of(c(invariants, "n_students", "row_total"))) %>%
+          dplyr::mutate(
+            subgroup = .x,
+            pct = n_students / row_total,
+            grade_level = "TOTAL"
+          ) %>%
+          dplyr::select(dplyr::all_of(c(invariants, "grade_level", "subgroup", "n_students", "pct")))
+      }
+    )
+  } else {
+    tidy_subgroups <- NULL
+  }
+
+  # Extract total enrollment as a "subgroup"
+  if ("row_total" %in% names(df)) {
+    tidy_total <- df %>%
+      dplyr::select(dplyr::all_of(c(invariants, "row_total"))) %>%
+      dplyr::mutate(
+        n_students = row_total,
+        subgroup = "total_enrollment",
+        pct = 1.0,
+        grade_level = "TOTAL"
+      ) %>%
+      dplyr::select(dplyr::all_of(c(invariants, "grade_level", "subgroup", "n_students", "pct")))
+  } else {
+    tidy_total <- NULL
+  }
+
+  # Transform grade-level enrollment to long format
+  if (length(grade_cols) > 0) {
+    grade_level_map <- c(
+      "grade_ee" = "EE",
+      "grade_pk" = "PK",
+      "grade_k" = "K",
+      "grade_01" = "01",
+      "grade_02" = "02",
+      "grade_03" = "03",
+      "grade_04" = "04",
+      "grade_05" = "05",
+      "grade_06" = "06",
+      "grade_07" = "07",
+      "grade_08" = "08",
+      "grade_09" = "09",
+      "grade_10" = "10",
+      "grade_11" = "11",
+      "grade_12" = "12"
+    )
+
+    tidy_grades <- purrr::map_df(
+      grade_cols,
+      function(.x) {
+        gl <- grade_level_map[.x]
+        if (is.na(gl)) gl <- .x
+
+        df %>%
+          dplyr::rename(n_students = dplyr::all_of(.x)) %>%
+          dplyr::select(dplyr::all_of(c(invariants, "n_students", "row_total"))) %>%
+          dplyr::mutate(
+            subgroup = "total_enrollment",
+            pct = n_students / row_total,
+            grade_level = gl
+          ) %>%
+          dplyr::select(dplyr::all_of(c(invariants, "grade_level", "subgroup", "n_students", "pct")))
+      }
+    )
+  } else {
+    tidy_grades <- NULL
+  }
+
+  # Combine all tidy data
+  dplyr::bind_rows(tidy_total, tidy_subgroups, tidy_grades) %>%
+    dplyr::filter(!is.na(n_students))
 }
 
 
@@ -37,41 +137,103 @@ tidy_enr <- function(df) {
 #' @param df Enrollment dataframe, output of tidy_enr
 #' @return data.frame with boolean aggregation flags
 #' @export
+#' @examples
+#' \dontrun{
+#' tidy_data <- fetch_enr(2024)
+#' # Data already has aggregation flags via id_enr_aggs
+#' table(tidy_data$is_state, tidy_data$is_district, tidy_data$is_campus)
+#' }
 id_enr_aggs <- function(df) {
+  df %>%
+    dplyr::mutate(
+      # State level: Type == "State"
+      is_state = type == "State",
 
-  # TODO: Implement id_enr_aggs for Texas
-  #
-  # Add flags:
-  # - is_state: TRUE for state-level aggregates
-  # - is_district: TRUE for district-level aggregates
-  # - is_campus: TRUE for campus-level records (called is_school in IL)
-  # - is_charter: TRUE for charter schools
-  #
-  # Texas charter detection:
-  # - District type codes indicate charter status
-  # - Need to identify TEA's charter designation method
+      # District level: Type == "District"
+      is_district = type == "District",
 
-  stop("id_enr_aggs() not yet implemented for Texas data")
+      # Campus level: Type == "Campus"
+      is_campus = type == "Campus",
+
+      # Charter detection - based on charter_flag column
+      is_charter = !is.na(charter_flag) & charter_flag == "Y"
+    )
 }
 
 
 #' Custom Enrollment Grade Level Aggregates
 #'
-#' Creates aggregations for common grade groupings: K-8, 9-12 (HS).
+#' Creates aggregations for common grade groupings: K-8, 9-12 (HS), K-12.
 #'
 #' @param df A tidy enrollment df
 #' @return df of aggregated enrollment data
 #' @export
+#' @examples
+#' \dontrun{
+#' tidy_data <- fetch_enr(2024)
+#' grade_aggs <- enr_grade_aggs(tidy_data)
+#' }
 enr_grade_aggs <- function(df) {
 
-  # TODO: Implement enr_grade_aggs for Texas
-  #
-  # Create aggregates:
-  # - K8: Grades K-8
-  # - HS: Grades 9-12
-  # - K12: Grades K-12 (excluding PK)
-  #
-  # Follow same pattern as ilschooldata
+  # Group by invariants (everything except grade_level and counts)
+  group_vars <- c(
+    "end_year", "type",
+    "district_id", "campus_id",
+    "district_name", "campus_name",
+    "county", "region", "charter_flag",
+    "subgroup",
+    "is_state", "is_district", "is_campus", "is_charter"
+  )
+  group_vars <- group_vars[group_vars %in% names(df)]
 
-  stop("enr_grade_aggs() not yet implemented for Texas data")
+  # K-8 aggregate
+  k8_agg <- df %>%
+    dplyr::filter(
+      subgroup == "total_enrollment",
+      grade_level %in% c("K", "01", "02", "03", "04", "05", "06", "07", "08")
+    ) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_vars))) %>%
+    dplyr::summarize(
+      n_students = sum(n_students, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    dplyr::mutate(
+      grade_level = "K8",
+      pct = NA_real_
+    )
+
+  # High school (9-12) aggregate
+  hs_agg <- df %>%
+    dplyr::filter(
+      subgroup == "total_enrollment",
+      grade_level %in% c("09", "10", "11", "12")
+    ) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_vars))) %>%
+    dplyr::summarize(
+      n_students = sum(n_students, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    dplyr::mutate(
+      grade_level = "HS",
+      pct = NA_real_
+    )
+
+  # K-12 aggregate (excludes PK and EE)
+  k12_agg <- df %>%
+    dplyr::filter(
+      subgroup == "total_enrollment",
+      grade_level %in% c("K", "01", "02", "03", "04", "05", "06", "07", "08",
+                         "09", "10", "11", "12")
+    ) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_vars))) %>%
+    dplyr::summarize(
+      n_students = sum(n_students, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    dplyr::mutate(
+      grade_level = "K12",
+      pct = NA_real_
+    )
+
+  dplyr::bind_rows(k8_agg, hs_agg, k12_agg)
 }
