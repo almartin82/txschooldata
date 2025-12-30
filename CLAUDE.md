@@ -5,6 +5,7 @@
 - Do NOT include "Generated with Claude Code" in commit messages
 - Do NOT include "Co-Authored-By: Claude" in commit messages
 - Do NOT mention Claude or AI assistance in PR descriptions
+- Keep commit messages clean and professional
 
 ## Project Context
 

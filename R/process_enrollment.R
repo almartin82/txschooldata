@@ -63,6 +63,7 @@ process_enr <- function(raw_data, end_year) {
 process_campus_enr <- function(df, end_year) {
 
   cols <- names(df)
+  n_rows <- nrow(df)
 
   # Helper to find column by pattern (case-insensitive)
   find_col <- function(patterns) {
@@ -73,10 +74,10 @@ process_campus_enr <- function(df, end_year) {
     NULL
   }
 
-  # Build result dataframe
+  # Build result dataframe with same number of rows as input
   result <- data.frame(
-    end_year = end_year,
-    type = "Campus",
+    end_year = rep(end_year, n_rows),
+    type = rep("Campus", n_rows),
     stringsAsFactors = FALSE
   )
 
@@ -159,11 +160,11 @@ process_campus_enr <- function(df, end_year) {
     }
   }
 
-  # Grade levels
+  # Grade levels - TEA uses CPETGEEC, CPETGPKC, CPETGKNC, CPETG01C etc
   grade_map <- list(
-    grade_ee = c("CPETEEC", "PETEEC"),
-    grade_pk = c("CPETPKC", "PETPKC"),
-    grade_k = c("CPETKGC", "PETKGC"),
+    grade_ee = c("CPETGEEC", "PETGEEC"),
+    grade_pk = c("CPETGPKC", "PETGPKC"),
+    grade_k = c("CPETGKNC", "PETGKNC"),
     grade_01 = c("CPETG01C", "PETG01C"),
     grade_02 = c("CPETG02C", "PETG02C"),
     grade_03 = c("CPETG03C", "PETG03C"),
@@ -198,6 +199,7 @@ process_campus_enr <- function(df, end_year) {
 process_district_enr <- function(df, end_year) {
 
   cols <- names(df)
+  n_rows <- nrow(df)
 
   # Helper to find column by pattern (case-insensitive)
   find_col <- function(patterns) {
@@ -208,10 +210,10 @@ process_district_enr <- function(df, end_year) {
     NULL
   }
 
-  # Build result dataframe
+  # Build result dataframe with same number of rows as input
   result <- data.frame(
-    end_year = end_year,
-    type = "District",
+    end_year = rep(end_year, n_rows),
+    type = rep("District", n_rows),
     stringsAsFactors = FALSE
   )
 
@@ -222,7 +224,7 @@ process_district_enr <- function(df, end_year) {
   }
 
   # Campus ID is NA for district rows
-  result$campus_id <- NA_character_
+  result$campus_id <- rep(NA_character_, n_rows)
 
   # Names
   district_name_col <- find_col(c("DISTNAME", "DISTRICTNAME"))
@@ -230,7 +232,7 @@ process_district_enr <- function(df, end_year) {
     result$district_name <- trimws(df[[district_name_col]])
   }
 
-  result$campus_name <- NA_character_
+  result$campus_name <- rep(NA_character_, n_rows)
 
   # County and region
   county_col <- find_col(c("CNTYNAME", "COUNTYNAME", "COUNTY"))
@@ -287,11 +289,11 @@ process_district_enr <- function(df, end_year) {
     }
   }
 
-  # Grade levels
+  # Grade levels - TEA uses DPETGEEC, DPETGPKC, DPETGKNC, DPETG01C etc
   grade_map <- list(
-    grade_ee = c("DPETEEC", "PETEEC"),
-    grade_pk = c("DPETPKC", "PETPKC"),
-    grade_k = c("DPETKGC", "PETKGC"),
+    grade_ee = c("DPETGEEC", "PETGEEC"),
+    grade_pk = c("DPETGPKC", "PETGPKC"),
+    grade_k = c("DPETGKNC", "PETGKNC"),
     grade_01 = c("DPETG01C", "PETG01C"),
     grade_02 = c("DPETG02C", "PETG02C"),
     grade_03 = c("DPETG03C", "PETG03C"),

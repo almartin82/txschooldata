@@ -1,0 +1,37 @@
+url: https://almartin82.github.io/txschooldata/
+
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left: [intro, reference, articles]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: Getting Started
+        href: articles/quickstart.html
+      - text: Data Quality Analysis
+        href: articles/data-quality-qa.html
+
+reference:
+- title: Fetch Data
+  desc: Download enrollment data from TEA
+  contents:
+  - fetch_enr
+  - fetch_enr_multi
+
+- title: Process & Tidy
+  desc: Transform data into analysis-ready formats
+  contents:
+  - tidy_enr
+  - id_enr_aggs
+  - enr_grade_aggs
+
+- title: Cache Management
+  desc: Manage locally cached data
+  contents:
+  - cache_status
+  - clear_cache

@@ -5,6 +5,9 @@
 # This file contains functions for downloading raw enrollment data from TEA.
 # Data comes from the Texas Academic Performance Reports (TAPR) system.
 #
+# TEA uses an interactive SAS-based download system. This package downloads
+# data via GET requests to the SAS broker endpoint with appropriate parameters.
+#
 # TAPR data structure:
 # - CSTUD: Campus Student Information (enrollment by campus)
 # - DSTUD: District Student Information (enrollment by district)
@@ -23,24 +26,20 @@
 #' @keywords internal
 get_raw_enr <- function(end_year) {
 
-  # Validate year - TAPR data available from 2013 onwards
-  if (end_year < 2013 || end_year > 2025) {
-    stop("end_year must be between 2013 and 2025")
+  # Validate year - TAPR data available from 2020 onwards with current system
+  if (end_year < 2020 || end_year > 2025) {
+    stop("end_year must be between 2020 and 2025")
   }
 
   message(paste("Downloading TEA enrollment data for", end_year, "..."))
 
-  # Download reference files (IDs, names, charter status)
-  cref <- download_tapr_file(end_year, "cref")
-  dref <- download_tapr_file(end_year, "dref")
+  # Download campus data (reference + student info combined)
+  message("  Downloading campus data...")
+  campus_data <- download_tapr_combined(end_year, "C")
 
-  # Download student information files (enrollment counts)
-  cstud <- download_tapr_file(end_year, "cstud")
-  dstud <- download_tapr_file(end_year, "dstud")
-
-  # Join reference data with student data
-  campus_data <- merge_tapr_data(cref, cstud, "campus")
-  district_data <- merge_tapr_data(dref, dstud, "district")
+  # Download district data (reference + student info combined)
+  message("  Downloading district data...")
+  district_data <- download_tapr_combined(end_year, "D")
 
   # Add end_year column
   campus_data$end_year <- end_year
@@ -53,129 +52,115 @@ get_raw_enr <- function(end_year) {
 }
 
 
-#' Build TAPR download URL
+#' Download combined TAPR reference and student data
 #'
-#' Constructs the download URL for a TAPR data file based on year and file type.
-#'
-#' @param end_year School year end
-#' @param file_type One of "cref", "dref", "cstud", "dstud", "sref", "sstud"
-#' @return URL string
-#' @keywords internal
-build_tapr_url <- function(end_year, file_type) {
-
-
-  # URL structure varies by year
-  # 2024+: Basic Download folder structure
-  # 2013-2023: xplore/download structure
-
-  base_url <- "https://rptsvr1.tea.texas.gov/perfreport/tapr"
-
-  if (end_year >= 2024) {
-    # Modern URL pattern (2024+)
-    # Example: https://rptsvr1.tea.texas.gov/perfreport/tapr/2024/download/state/cstud.dat
-    url <- paste0(base_url, "/", end_year, "/download/state/", file_type, ".dat")
-  } else {
-    # Legacy URL pattern (2013-2023)
-    # Example: https://rptsvr1.tea.texas.gov/perfreport/tapr/2023/download/state/cstud.dat
-    url <- paste0(base_url, "/", end_year, "/download/state/", file_type, ".dat")
-  }
-
-  url
-}
-
-
-#' Download a TAPR data file
-#'
-#' Downloads and parses a single TAPR data file.
+#' Downloads data from TEA's TAPR system using GET requests to the SAS broker.
+#' This function retrieves both reference (ID, name) and student (enrollment)
+#' data in a single request.
 #'
 #' @param end_year School year end
-#' @param file_type One of "cref", "dref", "cstud", "dstud"
+#' @param sumlev Summary level: "C" for campus, "D" for district
 #' @return Data frame
 #' @keywords internal
-download_tapr_file <- function(end_year, file_type) {
+download_tapr_combined <- function(end_year, sumlev) {
 
-  url <- build_tapr_url(end_year, file_type)
+  # Determine dataset name and select appropriate keys
+  if (sumlev == "C") {
+    dsname <- "CSTUD"
+    # IDENT = Campus/District ID and names
+    # PET = Student Membership Counts/Percents (demographics)
+    # PETG = Student Membership by Grade
+    keys <- c("IDENT", "PET", "PETG")
+    id_param <- "camp0=999999"  # 6 digits for "all campuses"
+  } else {
+    dsname <- "DSTUD"
+    keys <- c("IDENT", "PET", "PETG")
+    id_param <- "dist0=999999"
+  }
 
-  # Download to temp file
-  tname <- tempfile(
-    pattern = paste0("tea_", file_type, "_"),
-    tmpdir = tempdir(),
-    fileext = ".dat"
+  # Determine program path based on year
+  if (end_year >= 2024) {
+    prgopt <- paste0(end_year, "/tapr/Basic%20Download/xplore/getdata.sas")
+  } else {
+    prgopt <- paste0(end_year, "/tapr/xplore/getdata.sas")
+  }
+
+  # Build the URL with query parameters
+  # TEA's SAS broker requires multiple key parameters for column selection
+  base_url <- paste0("https://rptsvr1.tea.texas.gov/cgi/sas/broker/", dsname)
+  key_params <- paste0("key=", keys, collapse = "&")
+
+  url <- paste0(
+    base_url, "?",
+    "_service=marykay",
+    "&year4=", end_year,
+    "&prgopt=", prgopt,
+    "&_program=perfrept.perfmast.sas",
+    "&dsname=", dsname,
+    "&sumlev=", sumlev,
+    "&_debug=0",
+    "&format=CSV",
+    "&", id_param,
+    "&_saveas=", dsname,
+    "&datafmt=C",  # CSV format
+    "&", key_params
   )
 
-  # Try download with error handling
+  # Create temp file for download
+  tname <- tempfile(
+    pattern = paste0("tea_", tolower(dsname), "_"),
+    tmpdir = tempdir(),
+    fileext = ".csv"
+  )
+
+  # Download using httr
   tryCatch({
-    downloader::download(url, dest = tname, mode = "wb", quiet = TRUE)
+    response <- httr::GET(
+      url,
+      httr::write_disk(tname, overwrite = TRUE),
+      httr::timeout(300)
+    )
+
+    # Check for HTTP errors
+    if (httr::http_error(response)) {
+      stop(paste("HTTP error:", httr::status_code(response)))
+    }
+
+    # Check content type - should be CSV
+    content_type <- httr::headers(response)$`content-type`
+    if (!is.null(content_type) && !grepl("comma-separated|csv|text", content_type, ignore.case = TRUE)) {
+      # May have received HTML error page
+      first_lines <- readLines(tname, n = 3, warn = FALSE)
+      if (any(grepl("^<html|^<HTML|^<!DOCTYPE|error", first_lines, ignore.case = TRUE))) {
+        stop(paste("Received error page instead of CSV data for", dsname, "year", end_year))
+      }
+    }
+
+    # Check file size (small files likely error pages)
+    file_info <- file.info(tname)
+    if (file_info$size < 500) {
+      content <- readLines(tname, n = 10, warn = FALSE)
+      if (any(grepl("error|not found|404|completed with errors", content, ignore.case = TRUE))) {
+        stop(paste("SAS broker returned an error. Data may not be available for year", end_year))
+      }
+    }
+
   }, error = function(e) {
-    stop(paste("Failed to download", file_type, "data for year", end_year,
-               "\nURL:", url,
+    stop(paste("Failed to download", dsname, "data for year", end_year,
                "\nError:", e$message))
   })
 
-  # Check file size (small files likely error pages)
-  file_info <- file.info(tname)
-  if (file_info$size < 1000) {
-    # Try to read and check if it's an error page
-    content <- readLines(tname, n = 5, warn = FALSE)
-    if (any(grepl("error|not found|404", content, ignore.case = TRUE))) {
-      stop(paste("Data not available for year", end_year,
-                 "- received error page instead of data"))
-    }
-  }
-
-  # Read the comma-delimited file
-  # TAPR .dat files are comma-delimited with headers
+  # Read the CSV file
   df <- readr::read_csv(
     tname,
     col_types = readr::cols(.default = readr::col_character()),
     show_col_types = FALSE
   )
 
+  # Clean up temp file
+  unlink(tname)
+
   df
-}
-
-
-#' Merge TAPR reference and student data
-#'
-#' Joins reference data (names, IDs) with student data (counts) based on
-#' campus or district ID.
-#'
-#' @param ref_data Reference data frame (cref or dref)
-#' @param stud_data Student data frame (cstud or dstud)
-#' @param level Either "campus" or "district"
-#' @return Merged data frame
-#' @keywords internal
-merge_tapr_data <- function(ref_data, stud_data, level) {
-
-  # Determine join key based on level
-  if (level == "campus") {
-    join_key <- "CAMPUS"
-  } else {
-    join_key <- "DISTRICT"
-  }
-
-  # Check that join key exists in both datasets
-  if (!(join_key %in% names(ref_data))) {
-    # Try alternative column names
-    alt_keys <- c("CAMPUS", "CAMPUSNUMBER", "DISTRICT", "DISTRICTNUMBER")
-    found_key <- alt_keys[alt_keys %in% names(ref_data)][1]
-    if (!is.na(found_key)) {
-      names(ref_data)[names(ref_data) == found_key] <- join_key
-    }
-  }
-
-  if (!(join_key %in% names(stud_data))) {
-    alt_keys <- c("CAMPUS", "CAMPUSNUMBER", "DISTRICT", "DISTRICTNUMBER")
-    found_key <- alt_keys[alt_keys %in% names(stud_data)][1]
-    if (!is.na(found_key)) {
-      names(stud_data)[names(stud_data) == found_key] <- join_key
-    }
-  }
-
-  # Perform left join (keep all reference rows)
-  merged <- dplyr::left_join(ref_data, stud_data, by = join_key)
-
-  merged
 }
 
 
@@ -184,7 +169,7 @@ merge_tapr_data <- function(ref_data, stud_data, level) {
 #' Returns a list mapping TAPR column names to standardized names.
 #' TAPR uses a specific naming convention:
 #' - First char: C=Campus, D=District, R=Region, S=State
-#' - PET: Student enrollment
+#' - PET: Student membership/enrollment
 #' - Suffix: demographic or program code
 #'
 #' @return Named list of column mappings
@@ -216,10 +201,10 @@ get_tapr_column_map <- function() {
     lep = c("CPETLEPC", "DPETLEPC"),
     special_ed = c("CPETSPEC", "DPETSPEC"),
 
-    # Grade levels
-    grade_ee = c("CPETEEC", "DPETEEC"),
-    grade_pk = c("CPETPKC", "DPETPKC"),
-    grade_k = c("CPETKGC", "DPETKGC"),
+    # Grade levels - Note: column names use PETG prefix
+    grade_ee = c("CPETGEEC", "DPETGEEC"),
+    grade_pk = c("CPETGPKC", "DPETGPKC"),
+    grade_k = c("CPETGKNC", "DPETGKNC"),
     grade_01 = c("CPETG01C", "DPETG01C"),
     grade_02 = c("CPETG02C", "DPETG02C"),
     grade_03 = c("CPETG03C", "DPETG03C"),
