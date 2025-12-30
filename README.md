@@ -5,19 +5,30 @@
 [![pkgdown](https://github.com/almartin82/txschooldata/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/almartin82/txschooldata/actions/workflows/pkgdown.yaml)
 <!-- badges: end -->
 
-An R package for fetching and processing Texas school enrollment data from the Texas Education Agency (TEA) TAPR (Texas Academic Performance Reports) system.
+An R package for fetching and processing Texas school enrollment data from the Texas Education Agency (TEA) TAPR system.
 
-## Overview
+**Documentation: <https://almartin82.github.io/txschooldata/>**
 
-`txschooldata` provides a simple interface to download, cache, and analyze Texas public school enrollment data. The package handles:
-- Downloading data from TEA's TAPR system
-- Processing raw data into a standardized schema
-- Transforming data into tidy (long) format for analysis
-- Local caching for faster repeated access
+## 10 Things You Didn't Know About Texas Schools
+
+Texas public schools enroll **5.5 million students** across 1,200+ districts. Here's what the data reveals:
+
+| # | Finding | 2020-2024 |
+|---|---------|-----------|
+| 1 | **COVID erased a decade of growth** | -120,133 students in one year |
+| 2 | **1 in 4 students is an English learner** | LEP: 20.3% to 24.4% |
+| 3 | **Coppell ISD is Texas's first Asian-majority district** | 56.7% Asian |
+| 4 | **Fort Worth ISD lost 14% of its students** | -11,801 students |
+| 5 | **IDEA Public Schools grew 24% in 3 years** | +14,661 students |
+| 6 | **Fort Bend ISD has no racial majority** | No group over 28% |
+| 7 | **Kindergarten enrollment dropped 5.8%** | -22,256 students |
+| 8 | **62% of students are economically disadvantaged** | Up from 60.3% |
+| 9 | **White students dropped below 25%** | Down from 27% |
+| 10 | **439 districts now have Hispanic majorities** | +20 districts |
+
+**[Read the full analysis with charts and code](https://almartin82.github.io/txschooldata/articles/district-hooks.html)**
 
 ## Installation
-
-Install the development version from GitHub:
 
 ```r
 # install.packages("remotes")
@@ -33,7 +44,7 @@ library(dplyr)
 # Fetch 2024 enrollment data (2023-24 school year)
 enr <- fetch_enr(2024)
 
-# View state-level enrollment
+# State-level enrollment
 enr |>
   filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
   select(end_year, n_students)
@@ -46,17 +57,7 @@ enr |>
   head(10)
 ```
 
-### Wide Format
-
-If you prefer one column per demographic group:
-
-```r
-enr_wide <- fetch_enr(2024, tidy = FALSE)
-```
-
-### Multi-Year Data
-
-Fetch multiple years for trend analysis:
+### Multi-Year Trends
 
 ```r
 enr_multi <- fetch_enr_multi(2020:2024)
@@ -67,9 +68,11 @@ enr_multi |>
   select(end_year, n_students)
 ```
 
-## Documentation
+### Wide Format
 
-Full documentation is available at the [pkgdown site](https://almartin82.github.io/txschooldata/).
+```r
+enr_wide <- fetch_enr(2024, tidy = FALSE)
+```
 
 ## Available Data
 
@@ -77,37 +80,31 @@ Full documentation is available at the [pkgdown site](https://almartin82.github.
 
 **Subgroups:**
 - Demographics: white, black, hispanic, asian, native_american, pacific_islander, multiracial
-- Special populations: special_ed, lep (limited English proficiency), econ_disadv (economically disadvantaged)
+- Special populations: special_ed, lep, econ_disadv
 - Grade levels: EE, PK, K, 01-12
 
-**Aggregation Levels:**
-- State totals
-- District totals
-- Campus (school) level
+**Levels:** State, District, Campus
+
+## Documentation
+
+- [Getting Started](https://almartin82.github.io/txschooldata/articles/quickstart.html)
+- [10 Things You Didn't Know About Texas Schools](https://almartin82.github.io/txschooldata/articles/district-hooks.html)
+- [Function Reference](https://almartin82.github.io/txschooldata/reference/)
 
 ## Data Source
 
-Data is sourced from the **Texas Education Agency (TEA)** via the [TAPR (Texas Academic Performance Reports)](https://tea.texas.gov/reports-and-data) system.
-
-PEIMS (Public Education Information Management System) is the state's comprehensive data collection system for public education.
+Data from the **Texas Education Agency (TEA)** via the [TAPR system](https://tea.texas.gov/reports-and-data).
 
 ## Campus ID System
 
-Texas uses a hierarchical identifier system:
-
 - **District IDs:** 6 digits (e.g., `101912` for Austin ISD)
-- **Campus IDs:** 9 digits (district ID + 3-digit campus number, e.g., `101912001`)
-
-```r
-# Extract district from campus ID
-campus_id <- "101912001"
-district_id <- substr(campus_id, 1, 6)  # "101912"
-```
+- **Campus IDs:** 9 digits (district ID + 3-digit campus, e.g., `101912001`)
 
 ## Related Packages
 
-- [njschooldata](https://github.com/almartin82/njschooldata) - Similar package for New Jersey school data
-- [ilschooldata](https://github.com/almartin82/ilschooldata) - Similar package for Illinois school data
+- [njschooldata](https://github.com/almartin82/njschooldata) - New Jersey
+- [ilschooldata](https://github.com/almartin82/ilschooldata) - Illinois
 
 ## License
+
 MIT

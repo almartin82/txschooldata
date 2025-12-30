@@ -2,6 +2,14 @@ url: https://almartin82.github.io/txschooldata/
 
 template:
   bootstrap: 5
+  bootswatch: flatly
+
+home:
+  title: txschooldata - Texas School Enrollment Data
+  description: An R package for fetching and analyzing Texas public school enrollment data from TEA.
+  links:
+  - text: 10 Things You Didn't Know About Texas Schools
+    href: articles/district-hooks.html
 
 navbar:
   structure:
@@ -11,6 +19,12 @@ navbar:
     articles:
       text: Articles
       menu:
+      - text: "---"
+      - text: "Featured Analysis"
+      - text: 10 Things You Didn't Know About Texas Schools
+        href: articles/district-hooks.html
+      - text: "---"
+      - text: "Tutorials"
       - text: Getting Started
         href: articles/quickstart.html
       - text: Data Quality Analysis
@@ -35,3 +49,8 @@ reference:
   contents:
   - cache_status
   - clear_cache
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with
