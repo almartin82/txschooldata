@@ -79,10 +79,12 @@ download_tapr_combined <- function(end_year, sumlev) {
   }
 
   # Determine program path based on year
+  # 2024+: Uses "Basic Download" folder structure
+  # 2020-2023: Uses simpler path without "tapr/"
   if (end_year >= 2024) {
     prgopt <- paste0(end_year, "/tapr/Basic%20Download/xplore/getdata.sas")
   } else {
-    prgopt <- paste0(end_year, "/tapr/xplore/getdata.sas")
+    prgopt <- paste0(end_year, "/xplore/getdata.sas")
   }
 
   # Build the URL with query parameters

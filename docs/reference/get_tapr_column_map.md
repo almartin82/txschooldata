@@ -5,7 +5,7 @@ uses a specific naming convention:
 
 - First char: C=Campus, D=District, R=Region, S=State
 
-- PET: Student enrollment
+- PET: Student membership/enrollment
 
 - Suffix: demographic or program code
 
