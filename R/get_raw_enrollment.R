@@ -26,9 +26,12 @@
 #' @keywords internal
 get_raw_enr <- function(end_year) {
 
-  # Validate year - TAPR data available from 2020 onwards with current system
-  if (end_year < 2020 || end_year > 2025) {
-    stop("end_year must be between 2020 and 2025")
+
+  # Validate year - TAPR data available from 2013 onwards
+  # 2013-2023: Uses consistent TAPR SAS broker interface
+  # 2024+: Uses slightly different URL structure
+  if (end_year < 2013 || end_year > 2025) {
+    stop("end_year must be between 2013 and 2025")
   }
 
   message(paste("Downloading TEA enrollment data for", end_year, "..."))
