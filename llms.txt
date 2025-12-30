@@ -325,6 +325,16 @@ Up from 419 in 2020. Now **36%** of all Texas school districts.
 - **[Function
   reference](https://almartin82.github.io/txschooldata/reference/)**
 
+## Available data
+
+**Years:** 2013-2025 (school years 2012-13 through 2024-25)
+
+**Subgroups:** Demographics (white, black, hispanic, asian, etc.),
+special populations (LEP, special ed, econ disadvantaged), grade levels
+(EE-12)
+
+**Levels:** State, district, and campus
+
 ## Data source
 
 All data from the [Texas Education
