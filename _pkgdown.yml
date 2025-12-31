@@ -10,6 +10,8 @@ home:
   links:
   - text: 10 Things You Didn't Know About Texas Schools
     href: articles/district-hooks.html
+  - text: "Part of the 50 State Schooldata Family"
+    href: https://github.com/almartin82/njschooldata
 
 navbar:
   structure:

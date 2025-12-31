@@ -371,14 +371,22 @@ required.
 ### Caveats
 
 - **Asian/Pacific Islander:** Pre-2011 data combines Asian and Pacific
-  Islander into a single “asian” category. Separate Pacific Islander
+  Islander into a single "asian" category. Separate Pacific Islander
   data only available from 2011 onward (federal reporting change).
 - **Two or More Races:** Only available from 2011 onward (federal
   reporting change)
 - **Column names:** Standardized across years, but underlying TEA
   variable names differ between systems
-- **Historical comparisons:** Definition of “economically disadvantaged”
+- **Historical comparisons:** Definition of "economically disadvantaged"
   and other categories may shift over time
+
+## Part of the 50 State Schooldata Family
+
+This package is part of a family of R packages providing school enrollment data for all 50 US states. Each package fetches data directly from the state's Department of Education.
+
+**See also:** [njschooldata](https://github.com/almartin82/njschooldata) - The original state schooldata package for New Jersey.
+
+**All packages:** [github.com/almartin82](https://github.com/almartin82?tab=repositories&q=schooldata)
 
 ## License
 
