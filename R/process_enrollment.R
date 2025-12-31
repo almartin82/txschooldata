@@ -129,11 +129,13 @@ process_campus_enr <- function(df, end_year) {
   }
 
   # Demographics
+  # Note: Pre-2011 data uses PETPACC (Pacific/Asian combined) instead of separate
+  # PETASIC (Asian) and PETPCIC (Pacific Islander) columns
   demo_map <- list(
     white = c("CPETWHIC", "PETWHIC"),
     black = c("CPETBLAC", "PETBLAC"),
     hispanic = c("CPETHISC", "PETHISC"),
-    asian = c("CPETASIC", "PETASIC"),
+    asian = c("CPETASIC", "PETASIC", "CPETPACC", "PETPACC"),  # PACC = Pacific/Asian combined
     pacific_islander = c("CPETPCIC", "PETPCIC"),
     native_american = c("CPETINDC", "PETINDC"),
     multiracial = c("CPETTWOC", "PETTWOC")
@@ -258,11 +260,13 @@ process_district_enr <- function(df, end_year) {
   }
 
   # Demographics
+  # Note: Pre-2011 data uses PETPACC (Pacific/Asian combined) instead of separate
+  # PETASIC (Asian) and PETPCIC (Pacific Islander) columns
   demo_map <- list(
     white = c("DPETWHIC", "PETWHIC"),
     black = c("DPETBLAC", "PETBLAC"),
     hispanic = c("DPETHISC", "PETHISC"),
-    asian = c("DPETASIC", "PETASIC"),
+    asian = c("DPETASIC", "PETASIC", "DPETPACC", "PETPACC"),  # PACC = Pacific/Asian combined
     pacific_islander = c("DPETPCIC", "PETPCIC"),
     native_american = c("DPETINDC", "PETINDC"),
     multiracial = c("DPETTWOC", "PETTWOC")

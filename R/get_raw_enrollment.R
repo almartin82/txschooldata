@@ -3,12 +3,14 @@
 # ==============================================================================
 #
 # This file contains functions for downloading raw enrollment data from TEA.
-# Data comes from two systems:
+# Data comes from three sources:
 # - TAPR (Texas Academic Performance Reports): 2013-present
-# - AEIS (Academic Excellence Indicator System): 2003-2012
+# - AEIS SAS broker (Academic Excellence Indicator System): 2003-2012
+# - AEIS CGI (older AEIS format): 1997-2002
 #
-# Both systems use an interactive SAS-based download interface. This package
-# downloads data via GET requests to the SAS broker endpoint.
+# Both 2003+ systems use an interactive SAS-based download interface. This
+# package downloads data via GET requests to the SAS broker endpoint.
+# The 1997-2002 data uses a simpler CGI endpoint with POST requests.
 #
 # Data structure:
 # - CSTUD/cstud: Campus Student Information (enrollment by campus)
@@ -21,7 +23,7 @@
 #' Download raw enrollment data from TEA
 #'
 #' Downloads campus and district enrollment data from TEA's reporting systems.
-#' Uses TAPR for 2013+ and AEIS for 2003-2012.
+#' Uses TAPR for 2013+, AEIS SAS broker for 2003-2012, and AEIS CGI for 1997-2002.
 #'
 #' @param end_year School year end (2023-24 = 2024)
 #' @return List with campus and district data frames
@@ -29,17 +31,21 @@
 get_raw_enr <- function(end_year) {
 
   # Validate year
-  # AEIS: 2003-2012, TAPR: 2013-2025
+  # AEIS CGI: 1997-2002, AEIS SAS: 2003-2012, TAPR: 2013-2025
 
-  if (end_year < 2003 || end_year > 2025) {
-    stop("end_year must be between 2003 and 2025")
+  if (end_year < 1997 || end_year > 2025) {
+    stop("end_year must be between 1997 and 2025")
   }
 
   message(paste("Downloading TEA enrollment data for", end_year, "..."))
 
   # Use appropriate download function based on year
-  if (end_year <= 2012) {
-    # AEIS system (2003-2012)
+  if (end_year <= 2002) {
+    # AEIS CGI system (1997-2002)
+    campus_data <- download_aeis_cgi(end_year, "camp")
+    district_data <- download_aeis_cgi(end_year, "dist")
+  } else if (end_year <= 2012) {
+    # AEIS SAS broker (2003-2012)
     campus_data <- download_aeis_data(end_year, "C")
     district_data <- download_aeis_data(end_year, "D")
   } else {
@@ -290,6 +296,121 @@ standardize_aeis_columns <- function(df, dsname) {
   })
 
   df
+}
+
+
+#' Download AEIS data via CGI endpoint (1997-2002)
+#'
+#' Downloads data from TEA's older AEIS system using POST requests to CGI.
+#' This system returns comma-delimited data without headers.
+#'
+#' @param end_year School year end (1997-2002)
+#' @param level Summary level: "camp" for campus, "dist" for district
+#' @return Data frame with combined reference and student data
+#' @keywords internal
+download_aeis_cgi <- function(end_year, level) {
+
+  message(paste0("  Downloading ", level, " data (AEIS CGI)..."))
+
+  # Build CGI URL - uses full year in path
+  cgi_url <- paste0("https://rptsvr1.tea.texas.gov/cgi/perfreport/", end_year, "aeis.cgi")
+
+  # Download reference data (names, IDs)
+  ref_data <- httr::POST(
+    cgi_url,
+    body = list(level = level, file = "ref", suf = ".dat"),
+    encode = "form",
+    httr::timeout(120)
+  )
+
+  if (httr::http_error(ref_data)) {
+    stop(paste("Failed to download reference data for year", end_year))
+  }
+
+  ref_content <- httr::content(ref_data, "text", encoding = "UTF-8")
+
+  # Download layout for reference to get column names
+  ref_layout <- httr::POST(
+    cgi_url,
+    body = list(level = level, file = "ref", suf = ".lyt"),
+    encode = "form",
+    httr::timeout(60)
+  )
+  ref_layout_text <- httr::content(ref_layout, "text", encoding = "UTF-8")
+  ref_cols <- parse_aeis_layout(ref_layout_text)
+
+  # Parse reference data
+  ref_df <- readr::read_csv(
+    ref_content,
+    col_names = ref_cols,
+    col_types = readr::cols(.default = readr::col_character()),
+    show_col_types = FALSE
+  )
+
+  # Download student data (enrollment counts)
+  stud_data <- httr::POST(
+    cgi_url,
+    body = list(level = level, file = "stud", suf = ".dat"),
+    encode = "form",
+    httr::timeout(120)
+  )
+
+  if (httr::http_error(stud_data)) {
+    stop(paste("Failed to download student data for year", end_year))
+  }
+
+  stud_content <- httr::content(stud_data, "text", encoding = "UTF-8")
+
+  # Download layout for student data
+  stud_layout <- httr::POST(
+    cgi_url,
+    body = list(level = level, file = "stud", suf = ".lyt"),
+    encode = "form",
+    httr::timeout(60)
+  )
+  stud_layout_text <- httr::content(stud_layout, "text", encoding = "UTF-8")
+  stud_cols <- parse_aeis_layout(stud_layout_text)
+
+  # Parse student data
+  stud_df <- readr::read_csv(
+    stud_content,
+    col_names = stud_cols,
+    col_types = readr::cols(.default = readr::col_character()),
+    show_col_types = FALSE
+  )
+
+  # Merge by ID column
+  id_col <- if (level == "camp") "CAMPUS" else "DISTRICT"
+
+  if (id_col %in% names(ref_df) && id_col %in% names(stud_df)) {
+    df <- dplyr::left_join(stud_df, ref_df, by = id_col)
+  } else {
+    df <- stud_df
+  }
+
+  df
+}
+
+
+#' Parse AEIS layout file to extract column names
+#'
+#' @param layout_text Text content of layout file
+#' @return Character vector of column names
+#' @keywords internal
+parse_aeis_layout <- function(layout_text) {
+  lines <- strsplit(layout_text, "\n")[[1]]
+
+  # Find lines with column definitions (start with 3-digit number)
+  col_lines <- grep("^[0-9]{3} ", lines, value = TRUE)
+
+  # Extract column names (second field after position number)
+  col_names <- sapply(col_lines, function(line) {
+    parts <- strsplit(trimws(line), "\\s+")[[1]]
+    if (length(parts) >= 2) parts[2] else NA
+  })
+
+  col_names <- col_names[!is.na(col_names)]
+  as.character(col_names)
 }
 
 

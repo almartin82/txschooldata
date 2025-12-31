@@ -334,20 +334,51 @@ Up from 419 in 2020. Now **36%** of all Texas school districts.
 - **[Function
   reference](https://almartin82.github.io/txschooldata/reference/)**
 
-## Available data
+## Data availability
 
-**Years:** 2003-2025 (school years 2002-03 through 2024-25)
+This package pulls from three TEA reporting systems:
 
-**Subgroups:** Demographics (white, black, hispanic, asian, etc.),
-special populations (LEP, special ed, econ disadvantaged), grade levels
-(EE-12)
+| System       | Years     | Notes                                |
+|--------------|-----------|--------------------------------------|
+| **AEIS CGI** | 1997-2002 | Older AEIS format via CGI endpoint   |
+| **AEIS SAS** | 2003-2012 | Academic Excellence Indicator System |
+| **TAPR**     | 2013-2025 | Texas Academic Performance Reports   |
 
-**Levels:** State, district, and campus
+All data is fetched directly from TEA servers—no manual downloads
+required.
 
-## Data source
+### What’s included
 
-All data from the [Texas Education
-Agency](https://tea.texas.gov/reports-and-data) TAPR system.
+- **Levels:** State, district (~1,200), and campus (~9,000)
+- **Demographics:** White, Black, Hispanic, Asian, American Indian,
+  Pacific Islander, Two or More Races
+- **Special populations:** Economically disadvantaged, LEP/English
+  learners, Special education, At-risk, Gifted
+- **Grade levels:** Early Education (EE) through Grade 12, plus totals
+
+### Formatting notes
+
+- **IDs:** District IDs are 6 digits (e.g., `101912` for Austin ISD).
+  Campus IDs are 9 digits (district + 3-digit campus number).
+- **Tidy format:** By default, `fetch_enr()` returns long/tidy data with
+  `subgroup`, `grade_level`, and `n_students` columns. Use
+  `tidy = FALSE` for wide format.
+- **Percentages:** The `pct` column is a proportion (0-1), not a
+  percentage. Multiply by 100 for display.
+- **Caching:** Data is cached locally after first download. Use
+  `use_cache = FALSE` to force refresh.
+
+### Caveats
+
+- **Asian/Pacific Islander:** Pre-2011 data combines Asian and Pacific
+  Islander into a single “asian” category. Separate Pacific Islander
+  data only available from 2011 onward (federal reporting change).
+- **Two or More Races:** Only available from 2011 onward (federal
+  reporting change)
+- **Column names:** Standardized across years, but underlying TEA
+  variable names differ between systems
+- **Historical comparisons:** Definition of “economically disadvantaged”
+  and other categories may shift over time
 
 ## License
 
