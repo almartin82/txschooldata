@@ -13,7 +13,8 @@
 #' PEIMS data files via the TAPR (Texas Academic Performance Reports) system.
 #'
 #' @param end_year A school year. Year is the end of the academic year - eg 2023-24
-#'   school year is year '2024'. Valid values are 2013-2025.
+#'   school year is year '2024'. Valid values are 2003-2025 (AEIS for 2003-2012,
+#'   TAPR for 2013-2025).
 #' @param tidy If TRUE (default), returns data in long (tidy) format with subgroup
 #'   column. If FALSE, returns wide format.
 #' @param use_cache If TRUE (default), uses locally cached data when available.
@@ -39,9 +40,9 @@
 #' }
 fetch_enr <- function(end_year, tidy = TRUE, use_cache = TRUE) {
 
-  # Validate year - TAPR data available from 2013 onwards
-  if (end_year < 2013 || end_year > 2025) {
-    stop("end_year must be between 2013 and 2025")
+  # Validate year - AEIS: 2003-2012, TAPR: 2013-2025
+  if (end_year < 2003 || end_year > 2025) {
+    stop("end_year must be between 2003 and 2025")
   }
 
   # Determine cache type based on tidy parameter
@@ -95,11 +96,11 @@ fetch_enr <- function(end_year, tidy = TRUE, use_cache = TRUE) {
 #' }
 fetch_enr_multi <- function(end_years, tidy = TRUE, use_cache = TRUE) {
 
-  # Validate years
-  invalid_years <- end_years[end_years < 2013 | end_years > 2025]
+  # Validate years - AEIS: 2003-2012, TAPR: 2013-2025
+  invalid_years <- end_years[end_years < 2003 | end_years > 2025]
   if (length(invalid_years) > 0) {
     stop(paste("Invalid years:", paste(invalid_years, collapse = ", "),
-               "\nend_year must be between 2013 and 2025"))
+               "\nend_year must be between 2003 and 2025"))
   }
 
   # Fetch each year
