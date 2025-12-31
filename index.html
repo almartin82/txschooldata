@@ -347,16 +347,76 @@
 </ul>
 </div>
 <div class="section level2">
-<h2 id="available-data">Available data<a class="anchor" aria-label="anchor" href="#available-data"></a>
+<h2 id="data-availability">Data availability<a class="anchor" aria-label="anchor" href="#data-availability"></a>
 </h2>
-<p><strong>Years:</strong> 2003-2025 (school years 2002-03 through 2024-25)</p>
-<p><strong>Subgroups:</strong> Demographics (white, black, hispanic, asian, etc.), special populations (LEP, special ed, econ disadvantaged), grade levels (EE-12)</p>
-<p><strong>Levels:</strong> State, district, and campus</p>
+<p>This package pulls from three TEA reporting systems:</p>
+<table class="table">
+<thead><tr class="header">
+<th>System</th>
+<th>Years</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>AEIS CGI</strong></td>
+<td>1997-2002</td>
+<td>Older AEIS format via CGI endpoint</td>
+</tr>
+<tr class="even">
+<td><strong>AEIS SAS</strong></td>
+<td>2003-2012</td>
+<td>Academic Excellence Indicator System</td>
+</tr>
+<tr class="odd">
+<td><strong>TAPR</strong></td>
+<td>2013-2025</td>
+<td>Texas Academic Performance Reports</td>
+</tr>
+</tbody>
+</table>
+<p>All data is fetched directly from TEA servers—no manual downloads required.</p>
+<div class="section level3">
+<h3 id="whats-included">What’s included<a class="anchor" aria-label="anchor" href="#whats-included"></a>
+</h3>
+<ul>
+<li>
+<strong>Levels:</strong> State, district (~1,200), and campus (~9,000)</li>
+<li>
+<strong>Demographics:</strong> White, Black, Hispanic, Asian, American Indian, Pacific Islander, Two or More Races</li>
+<li>
+<strong>Special populations:</strong> Economically disadvantaged, LEP/English learners, Special education, At-risk, Gifted</li>
+<li>
+<strong>Grade levels:</strong> Early Education (EE) through Grade 12, plus totals</li>
+</ul>
 </div>
-<div class="section level2">
-<h2 id="data-source">Data source<a class="anchor" aria-label="anchor" href="#data-source"></a>
-</h2>
-<p>All data from the <a href="https://tea.texas.gov/reports-and-data" class="external-link">Texas Education Agency</a> TAPR system.</p>
+<div class="section level3">
+<h3 id="formatting-notes">Formatting notes<a class="anchor" aria-label="anchor" href="#formatting-notes"></a>
+</h3>
+<ul>
+<li>
+<strong>IDs:</strong> District IDs are 6 digits (e.g., <code>101912</code> for Austin ISD). Campus IDs are 9 digits (district + 3-digit campus number).</li>
+<li>
+<strong>Tidy format:</strong> By default, <code><a href="reference/fetch_enr.html">fetch_enr()</a></code> returns long/tidy data with <code>subgroup</code>, <code>grade_level</code>, and <code>n_students</code> columns. Use <code>tidy = FALSE</code> for wide format.</li>
+<li>
+<strong>Percentages:</strong> The <code>pct</code> column is a proportion (0-1), not a percentage. Multiply by 100 for display.</li>
+<li>
+<strong>Caching:</strong> Data is cached locally after first download. Use <code>use_cache = FALSE</code> to force refresh.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="caveats">Caveats<a class="anchor" aria-label="anchor" href="#caveats"></a>
+</h3>
+<ul>
+<li>
+<strong>Asian/Pacific Islander:</strong> Pre-2011 data combines Asian and Pacific Islander into a single “asian” category. Separate Pacific Islander data only available from 2011 onward (federal reporting change).</li>
+<li>
+<strong>Two or More Races:</strong> Only available from 2011 onward (federal reporting change)</li>
+<li>
+<strong>Column names:</strong> Standardized across years, but underlying TEA variable names differ between systems</li>
+<li>
+<strong>Historical comparisons:</strong> Definition of “economically disadvantaged” and other categories may shift over time</li>
+</ul>
+</div>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
