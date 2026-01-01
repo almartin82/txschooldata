@@ -13,7 +13,7 @@ get_raw_enr(end_year)
 List with campus and district data frames
 }
 \description{
-Downloads campus and district enrollment data from the Texas Academic
-Performance Reports (TAPR) system.
+Downloads campus and district enrollment data from TEA's reporting systems.
+Uses TAPR for 2013+, AEIS SAS broker for 2003-2012, and AEIS CGI for 1997-2002.
 }
 \keyword{internal}
