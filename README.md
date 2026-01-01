@@ -6,11 +6,11 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/almartin82/txschooldata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/almartin82/txschooldata/actions/workflows/R-CMD-check.yaml)
+[![Python Tests](https://github.com/almartin82/txschooldata/actions/workflows/python-test.yaml/badge.svg)](https://github.com/almartin82/txschooldata/actions/workflows/python-test.yaml)
 [![pkgdown](https://github.com/almartin82/txschooldata/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/almartin82/txschooldata/actions/workflows/pkgdown.yaml)
 <!-- badges: end -->
 
-An R package for fetching and processing Texas school enrollment data
-from the Texas Education Agency (TEA).
+Fetch and analyze Texas school enrollment data from [TEA](https://tea.texas.gov/) in R or Python.
 
 **Documentation: <https://almartin82.github.io/txschooldata/>**
 
@@ -19,6 +19,48 @@ from the Texas Education Agency (TEA).
 ``` r
 # install.packages("remotes")
 remotes::install_github("almartin82/txschooldata")
+```
+
+## Quick Start
+
+### R
+
+```r
+library(txschooldata)
+library(dplyr)
+
+# Fetch 2024 data (2023-24 school year)
+enr <- fetch_enr(2024)
+
+# Statewide total
+enr |>
+  filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  select(n_students)
+#> 5,517,464 students
+```
+
+### Python
+
+```python
+import pytxschooldata as tx
+
+# Fetch 2024 data (2023-24 school year)
+enr = tx.fetch_enr(2024)
+
+# Statewide total
+total = enr[(enr['is_state'] == True) &
+            (enr['subgroup'] == 'total_enrollment') &
+            (enr['grade_level'] == 'TOTAL')]['n_students'].sum()
+print(f"{total:,} students")
+#> 5,517,464 students
+
+# Get multiple years
+enr_multi = tx.fetch_enr_multi([2020, 2021, 2022, 2023, 2024])
+
+# Check available years
+years = tx.get_available_years()
+print(f"Data available: {years['min_year']}-{years['max_year']}")
+#> Data available: 1997-2025
 ```
 
 ## What can you find with txschooldata?
