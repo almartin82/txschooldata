@@ -5,7 +5,7 @@ PEIMS data files via the TAPR (Texas Academic Performance Reports) system."></he
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">txschooldata</a>
 
@@ -20,7 +20,12 @@ PEIMS data files via the TAPR (Texas Academic Performance Reports) system."></he
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/quickstart.html">Getting Started</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Featured Analysis</h6></li>
+    <li><a class="dropdown-item" href="../articles/district-hooks.html">10 Things You Didn't Know About Texas Schools</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Tutorials</h6></li>
+    <li><a class="dropdown-item" href="../articles/quickstart.html">Getting Started</a></li>
     <li><a class="dropdown-item" href="../articles/data-quality-qa.html">Data Quality Analysis</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -55,8 +60,8 @@ PEIMS data files via the TAPR (Texas Academic Performance Reports) system.</p>
 
 <dl><dt id="arg-end-year">end_year<a class="anchor" aria-label="anchor" href="#arg-end-year"></a></dt>
 <dd><p>A school year. Year is the end of the academic year - eg 2023-24
-school year is year '2024'. Valid values are 2013-2025 (some years may have
-limited data or different formats).</p></dd>
+school year is year '2024'. Valid values are 1997-2025 (AEIS CGI for 1997-2002,
+AEIS SAS for 2003-2012, TAPR for 2013-2025).</p></dd>
 
 
 <dt id="arg-tidy">tidy<a class="anchor" aria-label="anchor" href="#arg-tidy"></a></dt>
@@ -89,8 +94,8 @@ Tidy format pivots these counts into subgroup and grade_level columns.</p>
 <span class="r-in"><span><span class="va">enr_fresh</span> <span class="op">&lt;-</span> <span class="fu">fetch_enr</span><span class="op">(</span><span class="fl">2024</span>, use_cache <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Filter to specific district</span></span></span>
-<span class="r-in"><span><span class="va">austin_isd</span> <span class="op">&lt;-</span> <span class="va">enr_2024</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">district_id</span> <span class="op">==</span> <span class="st">"101912"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">austin_isd</span> <span class="op">&lt;-</span> <span class="va">enr_2024</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">district_id</span> <span class="op">==</span> <span class="st">"101912"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
