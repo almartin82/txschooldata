@@ -1,7 +1,7 @@
 # txschooldata
 
-An R package for fetching and processing Texas school enrollment data
-from the Texas Education Agency (TEA).
+Fetch and analyze Texas school enrollment data from
+[TEA](https://tea.texas.gov/) in R or Python.
 
 **Documentation: <https://almartin82.github.io/txschooldata/>**
 
@@ -10,6 +10,48 @@ from the Texas Education Agency (TEA).
 ``` r
 # install.packages("remotes")
 remotes::install_github("almartin82/txschooldata")
+```
+
+## Quick Start
+
+### R
+
+``` r
+library(txschooldata)
+library(dplyr)
+
+# Fetch 2024 data (2023-24 school year)
+enr <- fetch_enr(2024)
+
+# Statewide total
+enr |>
+  filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  select(n_students)
+#> 5,517,464 students
+```
+
+### Python
+
+``` python
+import pytxschooldata as tx
+
+# Fetch 2024 data (2023-24 school year)
+enr = tx.fetch_enr(2024)
+
+# Statewide total
+total = enr[(enr['is_state'] == True) &
+            (enr['subgroup'] == 'total_enrollment') &
+            (enr['grade_level'] == 'TOTAL')]['n_students'].sum()
+print(f"{total:,} students")
+#> 5,517,464 students
+
+# Get multiple years
+enr_multi = tx.fetch_enr_multi([2020, 2021, 2022, 2023, 2024])
+
+# Check available years
+years = tx.get_available_years()
+print(f"Data available: {years['min_year']}-{years['max_year']}")
+#> Data available: 1997-2025
 ```
 
 ## What can you find with txschooldata?
@@ -372,17 +414,12 @@ required.
 - **Historical comparisons:** Definition of “economically disadvantaged”
   and other categories may shift over time
 
-## Part of the 50 State Schooldata Family
+## Part of the State Schooldata Project
 
-This package is part of a family of R packages providing school
-enrollment data for all 50 US states. Each package fetches data directly
-from the state’s Department of Education.
+A simple, consistent interface for accessing state-published school data
+in Python and R.
 
-**See also:**
-[njschooldata](https://github.com/almartin82/njschooldata) - The
-original state schooldata package for New Jersey.
-
-**All packages:**
+**All 50 state packages:**
 [github.com/almartin82](https://github.com/almartin82?tab=repositories&q=schooldata)
 
 ## License

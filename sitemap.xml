@@ -2,7 +2,9 @@
 <url><loc>https://almartin82.github.io/txschooldata/404.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/CLAUDE.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/LICENSE-text.html</loc></url>
+<url><loc>https://almartin82.github.io/txschooldata/LICENSE.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/PRD.html</loc></url>
+<url><loc>https://almartin82.github.io/txschooldata/TODO.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/articles/data-quality-qa.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/articles/district-hooks.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/articles/index.html</loc></url>
@@ -20,6 +22,7 @@
 <url><loc>https://almartin82.github.io/txschooldata/reference/enr_grade_aggs.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/reference/fetch_enr.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/reference/fetch_enr_multi.html</loc></url>
+<url><loc>https://almartin82.github.io/txschooldata/reference/get_available_years.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/reference/get_cache_dir.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/reference/get_cache_path.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/reference/get_raw_enr.html</loc></url>
@@ -27,7 +30,6 @@
 <url><loc>https://almartin82.github.io/txschooldata/reference/id_enr_aggs.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/reference/index.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/reference/parse_aeis_layout.html</loc></url>
-<url><loc>https://almartin82.github.io/txschooldata/reference/pipe.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/reference/process_campus_enr.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/reference/process_district_enr.html</loc></url>
 <url><loc>https://almartin82.github.io/txschooldata/reference/process_enr.html</loc></url>
