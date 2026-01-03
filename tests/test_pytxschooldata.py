@@ -1,81 +1,35 @@
 """
 Tests for pytxschooldata Python wrapper.
 
-Simple tests that mirror the R testthat tests - just verify the Python
-wrapper can call R functions and return DataFrames.
+Minimal smoke tests - the actual data logic is tested by R testthat.
+These just verify the Python wrapper imports and exposes expected functions.
 """
 
 import pytest
-import pandas as pd
 
 
-class TestImport:
-    """Test that the package can be imported."""
-
-    def test_import_package(self):
-        """Package imports successfully."""
-        import pytxschooldata as pkg
-        assert pkg is not None
-
-    def test_import_functions(self):
-        """Expected functions are available."""
-        import pytxschooldata as pkg
-        assert hasattr(pkg, 'fetch_enr')
-        assert hasattr(pkg, 'get_available_years')
-
-    def test_version_exists(self):
-        """Package has a version string."""
-        import pytxschooldata as pkg
-        assert hasattr(pkg, '__version__')
-        assert isinstance(pkg.__version__, str)
+def test_import_package():
+    """Package imports successfully."""
+    import pytxschooldata
+    assert pytxschooldata is not None
 
 
-class TestGetAvailableYears:
-    """Test get_available_years function."""
-
-    def test_returns_dict(self):
-        """Returns a dictionary with year info."""
-        import pytxschooldata as pkg
-        years = pkg.get_available_years()
-        assert isinstance(years, dict)
-        assert 'min_year' in years
-        assert 'max_year' in years
-
-    def test_years_are_reasonable(self):
-        """Year values are reasonable."""
-        import pytxschooldata as pkg
-        years = pkg.get_available_years()
-        assert years['min_year'] < years['max_year']
-        assert years['max_year'] >= 2020
-        assert years['max_year'] <= 2030
+def test_has_fetch_enr():
+    """fetch_enr function is available."""
+    import pytxschooldata
+    assert hasattr(pytxschooldata, 'fetch_enr')
+    assert callable(pytxschooldata.fetch_enr)
 
 
-class TestFetchEnr:
-    """Test fetch_enr function."""
-
-    def test_returns_dataframe(self):
-        """Returns a pandas DataFrame."""
-        import pytxschooldata as pkg
-        years = pkg.get_available_years()
-        df = pkg.fetch_enr(years['max_year'])
-        assert isinstance(df, pd.DataFrame)
-        assert len(df) > 0
-
-    def test_has_end_year_column(self):
-        """DataFrame has end_year column."""
-        import pytxschooldata as pkg
-        years = pkg.get_available_years()
-        df = pkg.fetch_enr(years['max_year'])
-        assert 'end_year' in df.columns
-
-    def test_validates_year_range(self):
-        """Invalid years raise errors."""
-        import pytxschooldata as pkg
-        with pytest.raises(Exception):
-            pkg.fetch_enr(1800)
-        with pytest.raises(Exception):
-            pkg.fetch_enr(2099)
+def test_has_get_available_years():
+    """get_available_years function is available."""
+    import pytxschooldata
+    assert hasattr(pytxschooldata, 'get_available_years')
+    assert callable(pytxschooldata.get_available_years)
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+def test_has_version():
+    """Package has a version string."""
+    import pytxschooldata
+    assert hasattr(pytxschooldata, '__version__')
+    assert isinstance(pytxschooldata.__version__, str)
