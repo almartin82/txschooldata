@@ -27,6 +27,22 @@ safe_numeric <- function(x) {
 }
 
 
+#' Clean TEA ID values
+#'
+#' TEA data often includes leading single quotes (') to force Excel to treat
+#' IDs as text. This function removes those quotes and trims whitespace.
+#'
+#' @param x Character vector of IDs
+#' @return Cleaned character vector
+#' @keywords internal
+clean_id <- function(x) {
+  # Remove leading single quote (used by TEA to force text in Excel)
+  x <- gsub("^'", "", x)
+  # Trim whitespace
+  trimws(x)
+}
+
+
 #' Process raw TEA enrollment data
 #'
 #' Transforms raw TAPR data into a standardized schema combining campus
@@ -81,17 +97,17 @@ process_campus_enr <- function(df, end_year) {
     stringsAsFactors = FALSE
   )
 
-  # IDs
+  # IDs - use clean_id to remove leading quotes from TEA data
   campus_col <- find_col(c("CAMPUS"))
   if (!is.null(campus_col)) {
-    result$campus_id <- trimws(df[[campus_col]])
+    result$campus_id <- clean_id(df[[campus_col]])
     # District ID is first 6 digits of 9-digit campus ID
     result$district_id <- substr(result$campus_id, 1, 6)
   }
 
   district_col <- find_col(c("DISTRICT"))
   if (!is.null(district_col) && is.null(result$district_id)) {
-    result$district_id <- trimws(df[[district_col]])
+    result$district_id <- clean_id(df[[district_col]])
   }
 
   # Names
@@ -219,10 +235,10 @@ process_district_enr <- function(df, end_year) {
     stringsAsFactors = FALSE
   )
 
-  # IDs
+  # IDs - use clean_id to remove leading quotes from TEA data
   district_col <- find_col(c("DISTRICT"))
   if (!is.null(district_col)) {
-    result$district_id <- trimws(df[[district_col]])
+    result$district_id <- clean_id(df[[district_col]])
   }
 
   # Campus ID is NA for district rows
