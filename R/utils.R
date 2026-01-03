@@ -14,7 +14,7 @@ NULL
 #' @return A list with components:
 #'   \describe{
 #'     \item{min_year}{Earliest available school year end (1997)}
-#'     \item{max_year}{Latest available school year end (2025)}
+#'     \item{max_year}{Latest available school year end (2024)}
 #'     \item{description}{Human-readable description of the data availability}
 #'   }
 #' @export
@@ -26,7 +26,7 @@ NULL
 get_available_years <- function() {
   list(
     min_year = 1997L,
-    max_year = 2025L,
-    description = "Texas enrollment data from TEA is available for school years 1996-97 through 2024-25 (end years 1997-2025). Data sources: AEIS CGI (1997-2002), AEIS SAS (2003-2012), TAPR (2013-2025)"
+    max_year = 2024L,
+    description = "Texas enrollment data from TEA is available for school years 1996-97 through 2023-24 (end years 1997-2024). Data sources: AEIS CGI (1997-2002), AEIS SAS (2003-2012), TAPR (2013-2024)"
   )
 }
