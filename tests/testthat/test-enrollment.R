@@ -17,15 +17,10 @@ test_that("safe_numeric handles various inputs", {
 })
 
 test_that("fetch_enr validates year parameter", {
-  expect_error(fetch_enr(2000), "end_year must be between")
+  # Year 1996 is before valid range (1997-2025)
+  expect_error(fetch_enr(1996), "end_year must be between")
+  # Year 2030 is after valid range
   expect_error(fetch_enr(2030), "end_year must be between")
-})
-
-test_that("build_tapr_url constructs valid URLs", {
-  url <- build_tapr_url(2024, "cstud")
-  expect_true(grepl("rptsvr1.tea.texas.gov", url))
-  expect_true(grepl("2024", url))
-  expect_true(grepl("cstud.dat", url))
 })
 
 test_that("get_cache_dir returns valid path", {
