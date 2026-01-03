@@ -32,7 +32,7 @@ years <- get_available_years()
 years$min_year
 #> [1] 1997
 years$max_year
-#> [1] 2025
+#> [1] 2024
 years$description
-#> [1] "Texas enrollment data from TEA is available for school years 1996-97 through 2024-25 (end years 1997-2025). Data sources: AEIS CGI (1997-2002), AEIS SAS (2003-2012), TAPR (2013-2025)"
+#> [1] "Texas enrollment data from TEA is available for school years 1996-97 through 2023-24 (end years 1997-2024). Data sources: AEIS CGI (1997-2002), AEIS SAS (2003-2012), TAPR (2013-2024)"
 ```
