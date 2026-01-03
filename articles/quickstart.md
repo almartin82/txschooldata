@@ -34431,9 +34431,9 @@ cache_status()
 
     ##   year type size_mb age_days
     ## 1 2020 tidy    1.87        0
-    ## 2 2021 tidy    3.75        0
-    ## 3 2022 tidy    3.82        0
-    ## 4 2023 tidy    3.86        0
+    ## 2 2021 tidy    3.76        0
+    ## 3 2022 tidy    3.84        0
+    ## 4 2023 tidy    3.88        0
     ## 5 2024 tidy    4.08        0
     ## 6 2024 wide    0.45        0
 
