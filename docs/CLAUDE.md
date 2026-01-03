@@ -1,33 +1,47 @@
-# Claude Code Instructions for txschooldata
+# Claude Code Instructions
 
-## Commit and PR Guidelines
+## Git Commits and PRs
 
-- Do NOT include “Generated with Claude Code” in commit messages
-- Do NOT include “Co-Authored-By: Claude” in commit messages
-- Do NOT mention Claude or AI assistance in PR descriptions
-- Keep commit messages clean and professional
+- NEVER reference Claude, Claude Code, or AI assistance in commit
+  messages
+- NEVER reference Claude, Claude Code, or AI assistance in PR
+  descriptions
+- NEVER add Co-Authored-By lines mentioning Claude or Anthropic
+- Keep commit messages focused on what changed, not how it was written
 
-## Project Context
+------------------------------------------------------------------------
 
-This is an R package for fetching and processing Texas school data from
-the Texas Education Agency (TEA).
+## Local Testing Before PRs (REQUIRED)
 
-### Key Data Characteristics
+**PRs will not be merged until CI passes.** Run these checks locally
+BEFORE opening a PR:
 
-- **Data Source**: Texas Education Agency (TEA) at
-  <https://tea.texas.gov/reports-and-data>
-- **ID System**:
-  - District IDs: 6 digits (e.g., 101912 for Austin ISD)
-  - Campus IDs: 9 digits (district ID + 3-digit campus number)
-- **Primary Data System**: PEIMS (Public Education Information
-  Management System)
-- **Number of Districts**: ~1,209
+### CI Checks That Must Pass
 
-## Package Structure
+| Check        | Local Command                                                                  | What It Tests                                  |
+|--------------|--------------------------------------------------------------------------------|------------------------------------------------|
+| R-CMD-check  | [`devtools::check()`](https://devtools.r-lib.org/reference/check.html)         | Package builds, tests pass, no errors/warnings |
+| Python tests | `pytest tests/test_pytxschooldata.py -v`                                       | Python wrapper works correctly                 |
+| pkgdown      | [`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html) | Documentation and vignettes render             |
 
-The package follows the same patterns as ilschooldata: -
-`fetch_enrollment.R` - Main user-facing function -
-`get_raw_enrollment.R` - Download raw data from TEA -
-`process_enrollment.R` - Process raw data into standard schema -
-`tidy_enrollment.R` - Transform to long format - `cache.R` - Local
-caching functions
+### Quick Commands
+
+``` r
+# R package check (required)
+devtools::check()
+
+# Python tests (required)
+system("pip install -e ./pytxschooldata && pytest tests/test_pytxschooldata.py -v")
+
+# pkgdown build (required)
+pkgdown::build_site()
+```
+
+### Pre-PR Checklist
+
+Before opening a PR, verify: - \[ \]
+[`devtools::check()`](https://devtools.r-lib.org/reference/check.html) —
+0 errors, 0 warnings - \[ \] `pytest tests/test_pytxschooldata.py` — all
+tests pass - \[ \]
+[`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html)
+— builds without errors - \[ \] Vignettes render (no `eval=FALSE` hacks)

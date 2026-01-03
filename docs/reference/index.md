@@ -8,6 +8,8 @@ Download enrollment data from TEA
   : Fetch Texas enrollment data
 - [`fetch_enr_multi()`](https://almartin82.github.io/txschooldata/reference/fetch_enr_multi.md)
   : Fetch enrollment data for multiple years
+- [`get_available_years()`](https://almartin82.github.io/txschooldata/reference/get_available_years.md)
+  : Get available years for Texas enrollment data
 
 ## Process & Tidy
 

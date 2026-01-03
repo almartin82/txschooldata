@@ -1,7 +1,8 @@
 # Download raw enrollment data from TEA
 
-Downloads campus and district enrollment data from the Texas Academic
-Performance Reports (TAPR) system.
+Downloads campus and district enrollment data from TEA's reporting
+systems. Uses TAPR for 2013+, AEIS SAS broker for 2003-2012, and AEIS
+CGI for 1997-2002.
 
 ## Usage
 
