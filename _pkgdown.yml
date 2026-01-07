@@ -56,6 +56,20 @@ reference:
   contents:
   - cache_status
   - clear_cache
+  - clear_directory_cache
+
+- title: Directory Data
+  desc: Fetch school directory information
+  contents:
+  - fetch_directory
+  - clear_directory_cache
+  - get_raw_directory
+  - process_directory
+  - read_cache_directory
+  - write_cache_directory
+  - build_cache_path_directory
+  - build_directory_url
+  - cache_exists_directory
 
 footer:
   structure:
