@@ -19,7 +19,7 @@ A list with components:
 
 - max_year:
 
-  Latest available school year end (2025)
+  Latest available school year end (2024)
 
 - description:
 
