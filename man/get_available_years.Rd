@@ -10,7 +10,7 @@ get_available_years()
 A list with components:
 \describe{
 \item{min_year}{Earliest available school year end (1997)}
-\item{max_year}{Latest available school year end (2025)}
+\item{max_year}{Latest available school year end (2024)}
 \item{description}{Human-readable description of the data availability}
 }
 }
