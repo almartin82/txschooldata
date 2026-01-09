@@ -6,12 +6,15 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/almartin82/txschooldata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/almartin82/txschooldata/actions/workflows/R-CMD-check.yaml)
-[![Python Tests](https://github.com/almartin82/txschooldata/actions/workflows/python-test.yaml/badge.svg)](https://github.com/almartin82/txschooldata/actions/workflows/python-test.yaml)
+[![Python
+Tests](https://github.com/almartin82/txschooldata/actions/workflows/python-test.yaml/badge.svg)](https://github.com/almartin82/txschooldata/actions/workflows/python-test.yaml)
 [![pkgdown](https://github.com/almartin82/txschooldata/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/almartin82/txschooldata/actions/workflows/pkgdown.yaml)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-Fetch and analyze Texas school enrollment data from [TEA](https://tea.texas.gov/) in R or Python.
+An R package for fetching and processing Texas school enrollment data
+from the Texas Education Agency (TEA).
 
 **Documentation: <https://almartin82.github.io/txschooldata/>**
 
@@ -20,48 +23,6 @@ Fetch and analyze Texas school enrollment data from [TEA](https://tea.texas.gov/
 ``` r
 # install.packages("remotes")
 remotes::install_github("almartin82/txschooldata")
-```
-
-## Quick Start
-
-### R
-
-```r
-library(txschooldata)
-library(dplyr)
-
-# Fetch 2024 data (2023-24 school year)
-enr <- fetch_enr(2024)
-
-# Statewide total
-enr |>
-  filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
-  select(n_students)
-#> 5,517,464 students
-```
-
-### Python
-
-```python
-import pytxschooldata as tx
-
-# Fetch 2024 data (2023-24 school year)
-enr = tx.fetch_enr(2024)
-
-# Statewide total
-total = enr[(enr['is_state'] == True) &
-            (enr['subgroup'] == 'total_enrollment') &
-            (enr['grade_level'] == 'TOTAL')]['n_students'].sum()
-print(f"{total:,} students")
-#> 5,517,464 students
-
-# Get multiple years
-enr_multi = tx.fetch_enr_multi([2020, 2021, 2022, 2023, 2024])
-
-# Check available years
-years = tx.get_available_years()
-print(f"Data available: {years['min_year']}-{years['max_year']}")
-#> Data available: 1997-2025
 ```
 
 ## What can you find with txschooldata?
@@ -80,7 +41,7 @@ library(scales)
 enr <- fetch_enr_multi(2020:2024)
 ```
 
-Here are ten narratives hiding in the numbers.
+Here are thirteen narratives hiding in the numbers.
 
 ------------------------------------------------------------------------
 
@@ -131,7 +92,13 @@ ggplot(lep, aes(end_year, pct)) +
   theme_minimal()
 ```
 
-<img src="man/figures/README-lep-plot-1.png" alt="" width="100%" />
+<figure>
+<img
+src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/lep-plot-1.png"
+alt="LEP students as percent of enrollment" />
+<figcaption aria-hidden="true">LEP students as percent of
+enrollment</figcaption>
+</figure>
 
 From 20.3% to **24.4%** in five years. Schools need more ESL teachers
 than ever.
@@ -248,20 +215,27 @@ America.
 ### 7. Kindergarten enrollment dropped 5.8%
 
 ``` r
-enr |>
+g2020 <- enr |>
   filter(is_state, subgroup == "total_enrollment",
-         grade_level %in% c("PK", "K", "01", "09", "12")) |>
-  select(end_year, grade_level, n_students) |>
-  pivot_wider(names_from = end_year, values_from = n_students) |>
-  mutate(change = `2024` - `2020`, pct = round(change / `2020` * 100, 1))
-#> # A tibble: 5 × 8
-#>   grade_level `2020` `2021` `2022` `2023` `2024` change   pct
-#>   <chr>        <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl> <dbl>
-#> 1 PK          248413 196560 222767 243493 247979   -434  -0.2
-#> 2 K           383585 360865 370054 367180 361329 -22256  -5.8
-#> 3 01          391175 380973 384494 399048 385096  -6079  -1.6
-#> 4 09          448929 436396 475437 477875 472595  23666   5.3
-#> 5 12          352258 362888 360056 364317 365788  13530   3.8
+         grade_level %in% c("PK", "K", "01", "09", "12"),
+         end_year == 2020) |>
+  select(grade_level, n_2020 = n_students)
+
+g2024 <- enr |>
+  filter(is_state, subgroup == "total_enrollment",
+         grade_level %in% c("PK", "K", "01", "09", "12"),
+         end_year == 2024) |>
+  select(grade_level, n_2024 = n_students)
+
+g2020 |>
+  inner_join(g2024, by = "grade_level") |>
+  mutate(change = n_2024 - n_2020, pct = round(change / n_2020 * 100, 1))
+#>   grade_level n_2020 n_2024 change  pct
+#> 1          PK 248413 247979   -434 -0.2
+#> 2           K 383585 361329 -22256 -5.8
+#> 3          01 391175 385096  -6079 -1.6
+#> 4          09 448929 472595  23666  5.3
+#> 5          12 352258 365788  13530  3.8
 ```
 
 **-22,256 kindergartners** since 2020. The pipeline is narrowing.
@@ -294,7 +268,13 @@ ggplot(econ, aes(end_year, pct)) +
   theme_minimal()
 ```
 
-<img src="man/figures/README-econ-plot-1.png" alt="" width="100%" />
+<figure>
+<img
+src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/econ-plot-1.png"
+alt="Economically disadvantaged students" />
+<figcaption aria-hidden="true">Economically disadvantaged
+students</figcaption>
+</figure>
 
 Up from 60.3%. Nearly two-thirds of Texas students qualify.
 
@@ -311,7 +291,7 @@ enr |>
   pivot_wider(names_from = subgroup, values_from = pct)
 #> # A tibble: 5 × 5
 #>   end_year white black hispanic asian
-#>      <dbl> <dbl> <dbl>    <dbl> <dbl>
+#>      <int> <dbl> <dbl>    <dbl> <dbl>
 #> 1     2020  27    12.6     52.8   4.6
 #> 2     2021  26.5  12.7     52.9   4.7
 #> 3     2022  26.3  12.8     52.8   4.8
@@ -337,7 +317,13 @@ enr |>
   theme(legend.position = "bottom")
 ```
 
-<img src="man/figures/README-demo-plot-1.png" alt="" width="100%" />
+<figure>
+<img
+src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/demo-plot-1.png"
+alt="Texas public school demographics over time" />
+<figcaption aria-hidden="true">Texas public school demographics over
+time</figcaption>
+</figure>
 
 Hispanic students are now **53.2%** of enrollment.
 
@@ -356,7 +342,7 @@ enr |>
   )
 #> # A tibble: 5 × 4
 #>   end_year total_districts hispanic_majority pct_majority
-#>      <dbl>           <int>             <int>        <dbl>
+#>      <int>           <int>             <int>        <dbl>
 #> 1     2020            1202               419         34.9
 #> 2     2021            1204               428         35.5
 #> 3     2022            1207               433         35.9
@@ -365,6 +351,67 @@ enr |>
 ```
 
 Up from 419 in 2020. Now **36%** of all Texas school districts.
+
+------------------------------------------------------------------------
+
+### 11. Border districts are shrinking faster than the state average
+
+``` r
+border_districts <- c("BROWNSVILLE ISD", "LAREDO ISD", "MCALLEN ISD", "YSLETA ISD")
+
+d2020 |>
+  inner_join(d2024, by = "district_id") |>
+  filter(district_name %in% border_districts) |>
+  mutate(pct = round((n_2024 - n_2020) / n_2020 * 100, 1)) |>
+  select(district_name, n_2020, n_2024, pct) |>
+  arrange(pct)
+#>     district_name n_2020 n_2024   pct
+#> 1 BROWNSVILLE ISD  42989  37032 -13.9
+#> 2      YSLETA ISD  40404  34875 -13.7
+#> 3      LAREDO ISD  23665  20557 -13.1
+#> 4     MCALLEN ISD  22354  20058 -10.3
+```
+
+**Brownsville -13.9%**, **Laredo -13.1%**—among the steepest declines in
+the state.
+
+<figure>
+<img
+src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/border-plot-1.png"
+alt="Border district enrollment trends" />
+<figcaption aria-hidden="true">Border district enrollment
+trends</figcaption>
+</figure>
+
+------------------------------------------------------------------------
+
+### 12. Dallas-Fort Worth suburbs are growing
+
+``` r
+dfw_suburbs <- c("FRISCO ISD", "PROSPER ISD", "MCKINNEY ISD", "DENTON ISD")
+
+d2020 |>
+  inner_join(d2024, by = "district_id") |>
+  filter(district_name %in% dfw_suburbs) |>
+  mutate(pct = round((n_2024 - n_2020) / n_2020 * 100, 1)) |>
+  select(district_name, n_2020, n_2024, pct) |>
+  arrange(desc(pct))
+#>   district_name n_2020 n_2024  pct
+#> 1   PROSPER ISD  16789  28394 69.1
+#> 2    DENTON ISD  30682  32779  6.8
+#> 3    FRISCO ISD  62571  66551  6.4
+#> 4  MCKINNEY ISD  24457  23149 -5.3
+```
+
+**Prosper +69.1%**, **Frisco +6.4%**. Corporate relocations fuel the
+suburban surge.
+
+<figure>
+<img
+src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/dfw-growth-plot-1.png"
+alt="DFW suburban district growth" />
+<figcaption aria-hidden="true">DFW suburban district growth</figcaption>
+</figure>
 
 ------------------------------------------------------------------------
 
@@ -414,20 +461,14 @@ required.
 ### Caveats
 
 - **Asian/Pacific Islander:** Pre-2011 data combines Asian and Pacific
-  Islander into a single "asian" category. Separate Pacific Islander
+  Islander into a single “asian” category. Separate Pacific Islander
   data only available from 2011 onward (federal reporting change).
 - **Two or More Races:** Only available from 2011 onward (federal
   reporting change)
 - **Column names:** Standardized across years, but underlying TEA
   variable names differ between systems
-- **Historical comparisons:** Definition of "economically disadvantaged"
+- **Historical comparisons:** Definition of “economically disadvantaged”
   and other categories may shift over time
-
-## Part of the State Schooldata Project
-
-A simple, consistent interface for accessing state-published school data in Python and R.
-
-**All 50 state packages:** [github.com/almartin82](https://github.com/almartin82?tab=repositories&q=schooldata)
 
 ## License
 
