@@ -379,86 +379,9 @@ print(hisp_majority)
 
 ---
 
-## 11. Houston ISD Lost More Students Than Most Districts Even Have
+## 11. Border Districts Are Shrinking Faster Than the State Average
 
-**Houston ISD**, the largest district in Texas, lost **25,706 students** between 2020 and 2024—a 12.3% decline. That single loss exceeds the total enrollment of 90% of Texas districts.
-
-```{r houston-decline}
-# Houston ISD enrollment trend
-houston <- enr %>%
-  filter(district_name == "HOUSTON ISD", is_district,
-         subgroup == "total_enrollment", grade_level == "TOTAL") %>%
-  select(end_year, n_students) %>%
-  arrange(end_year) %>%
-  mutate(change = n_students - lag(n_students))
-
-print(houston)
-```
-
-```{r houston-plot}
-ggplot(houston, aes(x = end_year, y = n_students)) +
-  geom_line(linewidth = 1.2, color = "#BF5700") +
-  geom_point(size = 3, color = "#BF5700") +
-  geom_text(aes(label = comma(n_students)), vjust = -0.8, size = 3.5) +
-  scale_y_continuous(labels = comma, limits = c(175000, 215000)) +
-  labs(
-    title = "Houston ISD Enrollment Decline",
-    subtitle = "2020-2024 school years",
-    x = "School Year (End)", y = "Students"
-  ) +
-  theme_minimal()
-```
-
-The state takeover and charter expansion have accelerated Houston's enrollment challenges.
-
----
-
-## 12. Austin ISD Bucked the Urban Decline—Then Reversed
-
-While other urban districts hemorrhaged students, **Austin ISD** initially held steady. But after 2022, the trend reversed—Austin lost **4,469 students** by 2024.
-
-```{r austin-trend}
-# Austin ISD vs other urban districts
-urban_districts <- c("AUSTIN ISD", "DALLAS ISD", "SAN ANTONIO ISD", "HOUSTON ISD")
-
-urban_trend <- enr %>%
-  filter(district_name %in% urban_districts, is_district,
-         subgroup == "total_enrollment", grade_level == "TOTAL") %>%
-  select(end_year, district_name, n_students) %>%
-  group_by(district_name) %>%
-  arrange(end_year) %>%
-  mutate(
-    base = first(n_students),
-    indexed = n_students / base * 100
-  ) %>%
-  ungroup()
-```
-
-```{r austin-vs-urban-plot}
-ggplot(urban_trend, aes(x = end_year, y = indexed, color = district_name)) +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 2) +
-  geom_hline(yintercept = 100, linetype = "dashed", color = "gray50") +
-  scale_color_manual(
-    values = c("AUSTIN ISD" = "#BF5700", "DALLAS ISD" = "#003366",
-               "HOUSTON ISD" = "#CC0000", "SAN ANTONIO ISD" = "#009E73")
-  ) +
-  labs(
-    title = "Urban District Enrollment Indexed to 2020",
-    subtitle = "100 = 2020 enrollment level",
-    x = "School Year", y = "Index (2020 = 100)", color = NULL
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
-
-Housing costs and suburban migration are reshaping Texas's capital city schools.
-
----
-
-## 13. Border Districts Are Shrinking Faster Than the State Average
-
-Texas border counties face unique enrollment pressures. **Brownsville ISD** lost **13.9%** of its students, while **Laredo ISD** dropped **13.1%**—outpacing even Houston's decline.
+Texas border counties face unique enrollment pressures. **Brownsville ISD** lost **13.9%** of its students, while **Laredo ISD** dropped **13.1%**—among the steepest declines in the state.
 
 ```{r border-districts}
 # Border district changes
@@ -512,9 +435,9 @@ Economic conditions and migration patterns heavily impact these communities.
 
 ---
 
-## 14. Dallas-Fort Worth Suburbs Are Exploding
+## 12. Dallas-Fort Worth Suburbs Are Growing
 
-While Dallas ISD and Fort Worth ISD lose students, surrounding suburban districts are booming. **Frisco ISD** grew by **13,241 students** (+24.8%) since 2020—more than IDEA's growth.
+While Dallas ISD and Fort Worth ISD lose students, surrounding suburban districts are growing. **Prosper ISD** grew by **69.1%** (+11,605 students) since 2020, while **Frisco ISD** added 3,980 students (+6.4%).
 
 ```{r dfw-suburbs}
 # DFW suburban growth
@@ -551,7 +474,7 @@ ggplot(dfw_change, aes(x = reorder(district_name, pct_change), y = pct_change, f
             hjust = -0.1, size = 3.5) +
   coord_flip() +
   scale_fill_manual(values = c("TRUE" = "#009E73", "FALSE" = "#CC0000")) +
-  scale_y_continuous(limits = c(-5, 50)) +
+  scale_y_continuous(limits = c(-5, 80)) +
   labs(
     title = "DFW Suburban District Growth (2020-2024)",
     x = NULL, y = "Percent Change"
@@ -563,72 +486,9 @@ Corporate relocations and new housing developments drive the suburban surge.
 
 ---
 
-## 15. San Antonio's Inner City Is Hollowing Out
-
-**San Antonio ISD** lost **7,212 students** (-14.3%), matching Fort Worth's decline rate. But surrounding districts like **Northside ISD** and **North East ISD** remain stable.
-
-```{r san-antonio}
-# San Antonio area districts
-sa_districts <- c("SAN ANTONIO ISD", "NORTHSIDE ISD", "NORTH EAST ISD",
-                  "SOUTH SAN ANTONIO ISD", "HARLANDALE ISD", "JUDSON ISD")
-
-sa_2020 <- enr %>%
-  filter(district_name %in% sa_districts, is_district,
-         subgroup == "total_enrollment", grade_level == "TOTAL",
-         end_year == 2020) %>%
-  select(district_id, n_2020 = n_students)
-
-sa_2024 <- enr %>%
-  filter(district_name %in% sa_districts, is_district,
-         subgroup == "total_enrollment", grade_level == "TOTAL",
-         end_year == 2024) %>%
-  select(district_id, district_name, n_2024 = n_students)
-
-sa_change <- sa_2020 %>%
-  inner_join(sa_2024, by = "district_id") %>%
-  mutate(
-    change = n_2024 - n_2020,
-    pct_change = round(change / n_2020 * 100, 1)
-  ) %>%
-  arrange(pct_change)
-
-print(sa_change %>% select(district_name, n_2020, n_2024, change, pct_change))
-```
-
-```{r san-antonio-plot}
-sa_long <- enr %>%
-  filter(district_name %in% sa_districts, is_district,
-         subgroup == "total_enrollment", grade_level == "TOTAL") %>%
-  select(end_year, district_name, n_students) %>%
-  group_by(district_name) %>%
-  arrange(end_year) %>%
-  mutate(
-    base = first(n_students),
-    indexed = n_students / base * 100
-  ) %>%
-  ungroup()
-
-ggplot(sa_long, aes(x = end_year, y = indexed, color = district_name)) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2) +
-  geom_hline(yintercept = 100, linetype = "dashed", color = "gray50") +
-  scale_color_viridis_d() +
-  labs(
-    title = "San Antonio Area District Enrollment",
-    subtitle = "Indexed to 2020 (100 = 2020 level)",
-    x = "School Year", y = "Index", color = NULL
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
-
-The urban core is losing families to outer suburbs and charters, a pattern repeating across Texas metros.
-
----
-
 ## Summary
 
-These fifteen findings illustrate the rapid transformation of Texas public education:
+These twelve findings illustrate the rapid transformation of Texas public education:
 
 | Finding | Change (2020-2024) |
 |---------|-------------------|
@@ -642,11 +502,8 @@ These fifteen findings illustrate the rapid transformation of Texas public educa
 | Economically disadvantaged | 60.3% to 62.3% |
 | White enrollment | 27.0% to 25.0% |
 | Hispanic majority districts | 419 to 439 (+20) |
-| Houston ISD | -25,706 students (-12.3%) |
-| Austin ISD | -4,469 students after 2022 peak |
 | Border districts | Brownsville -13.9%, Laredo -13.1% |
-| DFW suburbs | Frisco +24.8%, Prosper +47.7% |
-| San Antonio ISD | -14.3% (-7,212 students) |
+| DFW suburbs | Prosper +69.1%, Frisco +6.4% |
 
 The data tells a story of suburbanization, rising poverty, linguistic diversity, and demographic transformation that will shape Texas education for decades to come.
 
