@@ -9,3 +9,4 @@ clear_staar_cache()
 \description{
 Clears all cached STAAR data files.
 }
+\keyword{internal}

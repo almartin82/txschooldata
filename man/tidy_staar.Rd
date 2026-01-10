@@ -17,3 +17,4 @@ Converts processed STAAR data from wide format to tidy long format.
 Each row represents a unique combination of entity, subject, performance level,
 and student group with the corresponding count.
 }
+\keyword{internal}

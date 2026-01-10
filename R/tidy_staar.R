@@ -18,7 +18,7 @@
 #'
 #' @param processed_data Processed data frame from process_staar()
 #' @return Tidy data frame in long format
-#' @export
+#' @keywords internal
 tidy_staar <- function(processed_data) {
 
   # Identify identifier columns

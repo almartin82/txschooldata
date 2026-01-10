@@ -24,7 +24,7 @@
 #' @param level "district" or "campus"
 #' @param grade Grade level
 #' @return Processed data frame with standardized columns
-#' @export
+#' @keywords internal
 process_staar <- function(raw_data, year, level, grade) {
 
   # Make a copy to avoid modifying original

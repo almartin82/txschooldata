@@ -12,3 +12,4 @@ Integer vector of available grades (3-8)
 \description{
 Returns available grade levels for STAAR data.
 }
+\keyword{internal}

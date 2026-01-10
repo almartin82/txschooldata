@@ -12,3 +12,4 @@ Integer vector of available years
 \description{
 Returns a vector of years for which STAAR data is available.
 }
+\keyword{internal}

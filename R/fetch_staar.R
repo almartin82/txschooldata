@@ -19,7 +19,7 @@
 #' @param tidy Return tidy long format? (default: FALSE)
 #' @param use_cache Use cached data if available? (default: TRUE)
 #' @return Data frame with STAAR assessment data
-#' @export
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #' # Fetch district-level Grade 3 RLA and Math results for 2023
@@ -154,7 +154,7 @@ write_cache_staar <- function(data, year, level, grade, subject, cache_type) {
 #'
 #' Clears all cached STAAR data files.
 #'
-#' @export
+#' @keywords internal
 clear_staar_cache <- function() {
 
   cache_dir <- get_cache_dir()

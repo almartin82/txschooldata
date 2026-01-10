@@ -22,3 +22,4 @@ Data frame with raw STAAR data
 Downloads STAAR aggregate data files from TEA's website. Legacy format
 covers 2018-2023 (no data for 2019-2020).
 }
+\keyword{internal}

@@ -31,7 +31,7 @@ STAAR_BASE_URL <- "https://tea.texas.gov/student-assessment/student-assessment-r
 #' @param grade Grade level (3-8)
 #' @param subject "english" or "spanish" (default: "english")
 #' @return Data frame with raw STAAR data
-#' @export
+#' @keywords internal
 get_raw_staar <- function(year, level, grade, subject = "english") {
 
   # Validate year
@@ -126,7 +126,7 @@ get_raw_staar <- function(year, level, grade, subject = "english") {
 #' Returns a vector of years for which STAAR data is available.
 #'
 #' @return Integer vector of available years
-#' @export
+#' @keywords internal
 staar_available_years <- function() {
   c(2018, 2021, 2022, 2023)
 }
@@ -136,7 +136,7 @@ staar_available_years <- function() {
 #' Returns available grade levels for STAAR data.
 #'
 #' @return Integer vector of available grades (3-8)
-#' @export
+#' @keywords internal
 get_staar_grades <- function() {
   3:8
 }
