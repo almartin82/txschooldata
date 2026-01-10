@@ -257,6 +257,27 @@ Up from 419 in 2020. Now **36%** of all Texas school districts.
 
 ---
 
+## Graduation rates
+
+Track four-year longitudinal graduation rates for the Class of 2003-2024:
+
+```{r grad-rates}
+library(txschooldata)
+
+# Get Class of 2024 graduation rates
+grad <- fetch_grad(2024)
+
+# State graduation rate by subgroup
+grad |>
+  filter(type == "State") |>
+  select(subgroup, grad_rate) |>
+  arrange(desc(grad_rate))
+```
+
+Data available for all students plus race/ethnicity, gender, and special populations (economically disadvantaged, special education, LEP, at-risk).
+
+---
+
 ## Learn more
 
 - **[Full analysis with more charts](https://almartin82.github.io/txschooldata/articles/district-hooks.html)**
@@ -277,10 +298,17 @@ All data is fetched directly from TEA servers—no manual downloads required.
 
 ### What's included
 
+**Enrollment data:**
 - **Levels:** State, district (~1,200), and campus (~9,000)
 - **Demographics:** White, Black, Hispanic, Asian, American Indian, Pacific Islander, Two or More Races
 - **Special populations:** Economically disadvantaged, LEP/English learners, Special education, At-risk, Gifted
 - **Grade levels:** Early Education (EE) through Grade 12, plus totals
+
+**Graduation rate data:**
+- **Years:** Class of 2003-2024 (four-year longitudinal rates)
+- **Levels:** State, district, campus
+- **Subgroups:** All students, race/ethnicity, gender, special populations
+- **Note:** Uses federal calculation for consistency across years
 
 ### Formatting notes
 
