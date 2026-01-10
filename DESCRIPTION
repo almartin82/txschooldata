@@ -16,7 +16,6 @@ Imports:
     readxl,
     readr,
     purrr,
-    stringr,
     tidyr,
     rlang,
     httr,
