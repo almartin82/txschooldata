@@ -38,17 +38,21 @@ navbar:
 
 reference:
 - title: Fetch Data
-  desc: Download enrollment data from TEA
+  desc: Download enrollment and graduation data from TEA
   contents:
   - fetch_enr
   - fetch_enr_multi
+  - fetch_grad
+  - fetch_grad_multi
   - get_available_years
 
 - title: Process & Tidy
   desc: Transform data into analysis-ready formats
   contents:
   - tidy_enr
+  - tidy_grad
   - id_enr_aggs
+  - id_grad_aggs
   - enr_grade_aggs
 
 - title: Cache Management
