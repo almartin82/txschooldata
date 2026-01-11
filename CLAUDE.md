@@ -90,7 +90,74 @@ Before opening a PR, verify: - \[ \] `devtools::check()` — 0 errors, 0
 warnings - \[ \] `pytest tests/test_pytxschooldata.py` — all tests
 pass - \[ \]
 [`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html)
-— builds without errors - \[ \] Vignettes render (no `eval=FALSE` hacks)
+— builds without errors - \[ \] Vignettes render (no `eval=FALSE`
+hacks) - \[ \] All new exported functions added to `_pkgdown.yml`
+reference index
+
+------------------------------------------------------------------------
+
+## pkgdown Configuration (CRITICAL)
+
+**Always update `_pkgdown.yml` when adding exported functions, or CI
+will fail.**
+
+### The Problem
+
+When you add functions with `@export` roxygen tags, pkgdown requires
+them to be listed in `_pkgdown.yml` under the `reference:` section. If
+they’re missing, pkgdown CI fails with:
+
+    In _pkgdown.yml, N topics missing from index: "func1", "func2", "func3"
+    Either add to the reference index, or use `@keywords internal` to drop from the index.
+
+### The Fix
+
+Add new functions to `_pkgdown.yml` in logical groupings:
+
+``` yaml
+reference:
+- title: Fetch Data
+  desc: Download data from TEA
+  contents:
+  - fetch_enr
+  - fetch_grad      # Add new functions here!
+  - fetch_staar
+
+- title: Process & Tidy
+  desc: Transform data into analysis-ready formats
+  contents:
+  - tidy_enr
+  - tidy_grad       # And here!
+  - tidy_staar
+```
+
+### Alternative: Mark as Internal
+
+If a function is internal/helper (not user-facing), add
+`@keywords internal` to exclude it from documentation:
+
+``` r
+#' @keywords internal
+#' @export
+internal_helper_function <- function() {
+  # This won't appear in pkgdown reference
+}
+```
+
+### Workflow Checklist
+
+When adding new exported functions: 1. Write function with `@export` tag
+2. Run `devtools::document()` to regenerate `.Rd` files 3. Add function
+to appropriate section in `_pkgdown.yml` 4. Run
+[`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html)
+to verify build works 5. Commit both code changes and `_pkgdown.yml`
+updates together
+
+**Lessons learned:** - Graduation rate PR (#10) failed CI for this
+reason - STAAR PR (#11) initially failed for the same reason - Local
+[`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html)
+testing catches this before pushing - This is a systematic workflow
+issue, not a one-time mistake
 
 ------------------------------------------------------------------------
 

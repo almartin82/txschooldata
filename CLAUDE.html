@@ -117,14 +117,57 @@
 </div>
 <div class="section level3">
 <h3 id="pre-pr-checklist">Pre-PR Checklist<a class="anchor" aria-label="anchor" href="#pre-pr-checklist"></a></h3>
-<p>Before opening a PR, verify: - [ ] <code>devtools::check()</code> — 0 errors, 0 warnings - [ ] <code>pytest tests/test_pytxschooldata.py</code> — all tests pass - [ ] <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code> — builds without errors - [ ] Vignettes render (no <code>eval=FALSE</code> hacks)</p>
+<p>Before opening a PR, verify: - [ ] <code>devtools::check()</code> — 0 errors, 0 warnings - [ ] <code>pytest tests/test_pytxschooldata.py</code> — all tests pass - [ ] <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code> — builds without errors - [ ] Vignettes render (no <code>eval=FALSE</code> hacks) - [ ] All new exported functions added to <code>_pkgdown.yml</code> reference index</p>
+<hr></div>
+</div>
+<div class="section level2">
+<h2 id="pkgdown-configuration-critical">pkgdown Configuration (CRITICAL)<a class="anchor" aria-label="anchor" href="#pkgdown-configuration-critical"></a></h2>
+<p><strong>Always update <code>_pkgdown.yml</code> when adding exported functions, or CI will fail.</strong></p>
+<div class="section level3">
+<h3 id="the-problem">The Problem<a class="anchor" aria-label="anchor" href="#the-problem"></a></h3>
+<p>When you add functions with <code>@export</code> roxygen tags, pkgdown requires them to be listed in <code>_pkgdown.yml</code> under the <code>reference:</code> section. If they’re missing, pkgdown CI fails with:</p>
+<pre><code>In _pkgdown.yml, N topics missing from index: "func1", "func2", "func3"
+Either add to the reference index, or use `@keywords internal` to drop from the index.</code></pre>
+</div>
+<div class="section level3">
+<h3 id="the-fix">The Fix<a class="anchor" aria-label="anchor" href="#the-fix"></a></h3>
+<p>Add new functions to <code>_pkgdown.yml</code> in logical groupings:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">reference</span><span class="kw">:</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">title</span><span class="kw">:</span><span class="at"> Fetch Data</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="at">  </span><span class="fu">desc</span><span class="kw">:</span><span class="at"> Download data from TEA</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="at">  </span><span class="fu">contents</span><span class="kw">:</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> fetch_enr</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> fetch_grad</span><span class="co">      # Add new functions here!</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> fetch_staar</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">title</span><span class="kw">:</span><span class="at"> Process &amp; Tidy</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="at">  </span><span class="fu">desc</span><span class="kw">:</span><span class="at"> Transform data into analysis-ready formats</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="at">  </span><span class="fu">contents</span><span class="kw">:</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> tidy_enr</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> tidy_grad</span><span class="co">       # And here!</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> tidy_staar</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="alternative-mark-as-internal">Alternative: Mark as Internal<a class="anchor" aria-label="anchor" href="#alternative-mark-as-internal"></a></h3>
+<p>If a function is internal/helper (not user-facing), add <code>@keywords internal</code> to exclude it from documentation:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#' @keywords internal</span></span>
+<span><span class="co">#' @export</span></span>
+<span><span class="va">internal_helper_function</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># This won't appear in pkgdown reference</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="workflow-checklist">Workflow Checklist<a class="anchor" aria-label="anchor" href="#workflow-checklist"></a></h3>
+<p>When adding new exported functions: 1. Write function with <code>@export</code> tag 2. Run <code>devtools::document()</code> to regenerate <code>.Rd</code> files 3. Add function to appropriate section in <code>_pkgdown.yml</code> 4. Run <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code> to verify build works 5. Commit both code changes and <code>_pkgdown.yml</code> updates together</p>
+<p><strong>Lessons learned:</strong> - Graduation rate PR (#10) failed CI for this reason - STAAR PR (#11) initially failed for the same reason - Local <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code> testing catches this before pushing - This is a systematic workflow issue, not a one-time mistake</p>
 <hr></div>
 </div>
 <div class="section level2">
 <h2 id="readme-images-from-vignettes-required">README Images from Vignettes (REQUIRED)<a class="anchor" aria-label="anchor" href="#readme-images-from-vignettes-required"></a></h2>
 <p><strong>NEVER use <code>man/figures/</code> or <code>generate_readme_figs.R</code> for README images.</strong></p>
 <p>README images MUST come from pkgdown-generated vignette output so they auto-update on merge:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="al">![Chart name](https://almartin82.github.io/{package}/articles/{vignette}_files/figure-html/{chunk-name}-1.png)</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="al">![Chart name](https://almartin82.github.io/{package}/articles/{vignette}_files/figure-html/{chunk-name}-1.png)</span></span></code></pre></div>
 <p><strong>Why:</strong> Vignette figures regenerate automatically when pkgdown builds. Manual <code>man/figures/</code> requires running a separate script and is easy to forget, causing stale/broken images.</p>
 </div>
 </div>
