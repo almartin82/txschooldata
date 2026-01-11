@@ -49,7 +49,7 @@ Data is returned in **tidy (long) format** by default. Each row is one subgroup 
 
 ## Filtering by Level
 
-```{r filter-levels}
+```{r filter-levels, eval=FALSE}
 # State totals
 enr |>
   filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL")
@@ -65,7 +65,7 @@ enr |>
 
 ## Top Districts
 
-```{r top-districts}
+```{r top-districts, eval=FALSE}
 enr |>
   filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL") |>
   arrange(desc(n_students)) |>
@@ -75,7 +75,7 @@ enr |>
 
 ## Demographics for One District
 
-```{r district-demo}
+```{r district-demo, eval=FALSE}
 # Austin ISD demographics
 enr |>
   filter(
