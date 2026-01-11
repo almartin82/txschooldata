@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-An R package for fetching and processing Texas school enrollment data from the Texas Education Agency (TEA).
+An R package for fetching and processing Texas school enrollment and assessment data from the Texas Education Agency (TEA).
 
 **Documentation: <https://almartin82.github.io/txschooldata/>**
 
@@ -33,6 +33,38 @@ An R package for fetching and processing Texas school enrollment data from the T
 ```{r install, eval = FALSE}
 # install.packages("remotes")
 remotes::install_github("almartin82/txschooldata")
+```
+
+## Quick Start
+
+### Enrollment Data
+
+```{r quickstart-enr, eval = FALSE}
+library(txschooldata)
+library(dplyr)
+
+# Fetch 2024 enrollment data (2023-24 school year)
+enr <- fetch_enr(2024)
+
+# Statewide total enrollment
+enr |>
+  filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  select(n_students)
+#> 5,517,464 students
+```
+
+### STAAR Assessment Data
+
+```{r quickstart-staar, eval = FALSE}
+# Fetch 2023 STAAR data for Grade 3 Math (district level)
+staar <- fetch_staar(2023, "district", 3, subject = "english")
+
+# Get Houston ISD performance
+staar |>
+  filter(district_id == "101912", subject == "Math") |>
+  select(district_name, all_total, all_did_not_meet, all_approaches, all_meets, all_masters)
+#>   district_name all_total all_did_not_meet all_approaches all_meets all_masters
+#> 1   HOUSTON ISD     10846             3488           7358      4716        3623
 ```
 
 ## What can you find with txschooldata?
@@ -310,12 +342,21 @@ All data is fetched directly from TEA servers—no manual downloads required.
 - **Subgroups:** All students, race/ethnicity, gender, special populations
 - **Note:** Uses federal calculation for consistency across years
 
+**STAAR assessment data:**
+- **Years:** 2018, 2021-2023 (legacy format)
+- **Levels:** District (~1,200) and campus (~9,000)
+- **Grades:** 3-8
+- **Subjects:** Reading/Language Arts (RLA) and Math
+- **Performance levels:** Did Not Meet, Approaches, Meets, Masters Grade Level
+- **Note:** 2019-2020 not available (COVID-19 pandemic disrupted testing)
+
 ### Formatting notes
 
 - **IDs:** District IDs are 6 digits (e.g., `101912` for Austin ISD). Campus IDs are 9 digits (district + 3-digit campus number).
-- **Tidy format:** By default, `fetch_enr()` returns long/tidy data with `subgroup`, `grade_level`, and `n_students` columns. Use `tidy = FALSE` for wide format.
+- **Tidy format:** By default, `fetch_enr()` returns long/tidy data with `subgroup`, `grade_level`, and `n_students` columns. Use `tidy = FALSE` for wide format. STAAR data works similarly with `fetch_staar()`.
 - **Percentages:** The `pct` column is a proportion (0-1), not a percentage. Multiply by 100 for display.
 - **Caching:** Data is cached locally after first download. Use `use_cache = FALSE` to force refresh.
+- **STAAR performance levels:** TEA's performance level counts may not sum to the total tested count. This is the TEA's data structure (students may be counted in multiple categories depending on reporting methodology).
 
 ### Caveats
 
