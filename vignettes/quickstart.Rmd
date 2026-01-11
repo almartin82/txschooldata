@@ -91,7 +91,7 @@ enr |>
 ## Multi-Year Trends
 
 ```{r multi-year}
-enr_multi <- fetch_enr_multi(2020:2024)
+enr_multi <- fetch_enr_multi(2023:2024)
 
 # State enrollment trend
 enr_multi |>
@@ -113,7 +113,7 @@ enr_wide <- fetch_enr(2024, tidy = FALSE)
 library(ggplot2)
 library(scales)
 
-enr_multi <- fetch_enr_multi(2020:2024)
+enr_multi <- fetch_enr_multi(2023:2024)
 
 # Demographics over time
 enr_multi |>
