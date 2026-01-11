@@ -24,7 +24,7 @@ remotes::install_github("almartin82/txschooldata")
 
 ## Basic Usage
 
-```{r fetch-data}
+```{r fetch-data, eval=FALSE}
 library(txschooldata)
 library(dplyr)
 
@@ -90,7 +90,7 @@ enr |>
 
 ## Multi-Year Trends
 
-```{r multi-year}
+```{r multi-year, eval=FALSE}
 enr_multi <- fetch_enr_multi(2020:2024)
 
 # State enrollment trend
@@ -103,13 +103,13 @@ enr_multi |>
 
 For one column per demographic:
 
-```{r wide}
+```{r wide, eval=FALSE}
 enr_wide <- fetch_enr(2024, tidy = FALSE)
 ```
 
 ## Visualization
 
-```{r viz}
+```{r viz, eval=FALSE}
 library(ggplot2)
 library(scales)
 
