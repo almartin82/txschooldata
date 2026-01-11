@@ -24,7 +24,7 @@ remotes::install_github("almartin82/txschooldata")
 
 ## Basic Usage
 
-```{r fetch-data, eval=FALSE}
+```{r fetch-data}
 library(txschooldata)
 library(dplyr)
 
@@ -49,7 +49,7 @@ Data is returned in **tidy (long) format** by default. Each row is one subgroup 
 
 ## Filtering by Level
 
-```{r filter-levels, eval=FALSE}
+```{r filter-levels}
 # State totals
 enr |>
   filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL")
@@ -65,7 +65,7 @@ enr |>
 
 ## Top Districts
 
-```{r top-districts, eval=FALSE}
+```{r top-districts}
 enr |>
   filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL") |>
   arrange(desc(n_students)) |>
@@ -75,7 +75,7 @@ enr |>
 
 ## Demographics for One District
 
-```{r district-demo, eval=FALSE}
+```{r district-demo}
 # Austin ISD demographics
 enr |>
   filter(
@@ -90,7 +90,7 @@ enr |>
 
 ## Multi-Year Trends
 
-```{r multi-year, eval=FALSE}
+```{r multi-year}
 enr_multi <- fetch_enr_multi(2020:2024)
 
 # State enrollment trend
@@ -103,13 +103,13 @@ enr_multi |>
 
 For one column per demographic:
 
-```{r wide, eval=FALSE}
+```{r wide}
 enr_wide <- fetch_enr(2024, tidy = FALSE)
 ```
 
 ## Visualization
 
-```{r viz, eval=FALSE}
+```{r viz}
 library(ggplot2)
 library(scales)
 
