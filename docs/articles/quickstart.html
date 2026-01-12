@@ -32785,49 +32785,35 @@ Each row is one subgroup for one entity (state/district/campus).</p>
 ## 9   native_american        325 0.001770124
 ## 10 pacific_islander        133 0.000724389</code></pre>
 </div>
-<div id="multi-year-trends" class="section level2">
-<h2>Multi-Year Trends</h2>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>enr_multi <span class="ot">&lt;-</span> <span class="fu">fetch_enr_multi</span>(<span class="dv">2020</span><span class="sc">:</span><span class="dv">2024</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co"># State enrollment trend</span></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>enr_multi <span class="sc">|&gt;</span></span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="fu">filter</span>(is_state, subgroup <span class="sc">==</span> <span class="st">&quot;total_enrollment&quot;</span>, grade_level <span class="sc">==</span> <span class="st">&quot;TOTAL&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="fu">select</span>(end_year, n_students)</span></code></pre></div>
+<div id="enrollment-by-year" class="section level2">
+<h2>Enrollment by Year</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># State total enrollment</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>enr <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="fu">filter</span>(is_state, subgroup <span class="sc">==</span> <span class="st">&quot;total_enrollment&quot;</span>, grade_level <span class="sc">==</span> <span class="st">&quot;TOTAL&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="fu">select</span>(end_year, n_students)</span></code></pre></div>
 <pre><code>##   end_year n_students
-## 1     2020    5479173
-## 2     2021    5359040
-## 3     2022    5402928
-## 4     2023    5504150
-## 5     2024    5517464</code></pre>
-</div>
-<div id="wide-format" class="section level2">
-<h2>Wide Format</h2>
-<p>For one column per demographic:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>enr_wide <span class="ot">&lt;-</span> <span class="fu">fetch_enr</span>(<span class="dv">2024</span>, <span class="at">tidy =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+## 1     2024    5517464</code></pre>
 </div>
 <div id="visualization" class="section level2">
 <h2>Visualization</h2>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">library</span>(scales)</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>enr_multi <span class="ot">&lt;-</span> <span class="fu">fetch_enr_multi</span>(<span class="dv">2020</span><span class="sc">:</span><span class="dv">2024</span>)</span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co"># Demographics over time</span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>enr_multi <span class="sc">|&gt;</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>    is_state,</span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>    subgroup <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;white&quot;</span>, <span class="st">&quot;black&quot;</span>, <span class="st">&quot;hispanic&quot;</span>, <span class="st">&quot;asian&quot;</span>),</span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>    grade_level <span class="sc">==</span> <span class="st">&quot;TOTAL&quot;</span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> end_year, <span class="at">y =</span> pct, <span class="at">color =</span> subgroup)) <span class="sc">+</span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">percent_format</span>()) <span class="sc">+</span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Texas Public School Demographics&quot;</span>,</span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;School Year&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Percent&quot;</span>, <span class="at">color =</span> <span class="cn">NULL</span></span>
-<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">library</span>(scales)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co"># 2024 state demographics (reusing fetched data)</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>enr <span class="sc">|&gt;</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>    is_state,</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>    subgroup <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;white&quot;</span>, <span class="st">&quot;black&quot;</span>, <span class="st">&quot;hispanic&quot;</span>, <span class="st">&quot;asian&quot;</span>),</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>    grade_level <span class="sc">==</span> <span class="st">&quot;TOTAL&quot;</span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(subgroup, <span class="sc">-</span>pct), <span class="at">y =</span> pct, <span class="at">fill =</span> subgroup)) <span class="sc">+</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">percent_format</span>()) <span class="sc">+</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Texas Public School Demographics (2024)&quot;</span>,</span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;Demographic Group&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Percent&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span></span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
 <p><img src="quickstart_files/figure-html/viz-1.png" class="r-plt" alt="" width="700" /></p>
 </div>
 <div id="available-subgroups" class="section level2">
@@ -32840,20 +32826,15 @@ learners), econ_disadv</p>
 </div>
 <div id="cache-management" class="section level2">
 <h2>Cache Management</h2>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># View cached files</span></span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">cache_status</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># View cached files</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">cache_status</span>()</span></code></pre></div>
 <pre><code>##   year type size_mb age_days
-## 1 2020 tidy    1.88        0
-## 2 2021 tidy    3.77        0
-## 3 2022 tidy    3.85        0
-## 4 2023 tidy    3.89        0
-## 5 2024 tidy    4.09        0
-## 6 2024 wide    0.45        0</code></pre>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Clear all cached data</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">clear_cache</span>()</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co"># Clear specific year</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="fu">clear_cache</span>(<span class="dv">2024</span>)</span></code></pre></div>
+## 1 2024 tidy    4.09        0</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Clear all cached data</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">clear_cache</span>()</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="co"># Clear specific year</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="fu">clear_cache</span>(<span class="dv">2024</span>)</span></code></pre></div>
 </div>
 <div id="next-steps" class="section level2">
 <h2>Next Steps</h2>
