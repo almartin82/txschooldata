@@ -13,7 +13,8 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE,
   fig.width = 8,
-  fig.height = 5
+  fig.height = 5,
+  cache = TRUE
 )
 ```
 
@@ -29,7 +30,7 @@ Texas public schools enroll over 5.5 million students across 1,200+ districts, m
 
 ```{r fetch-data, cache=TRUE}
 # Fetch 5 years of enrollment data
-enr <- fetch_enr_multi(2020:2024)
+enr <- fetch_enr_multi(2020:2024, use_cache = TRUE)
 ```
 
 ---
@@ -400,7 +401,7 @@ library(txschooldata)
 library(dplyr)
 
 # Fetch 2024 data
-enr <- fetch_enr(2024)
+enr <- fetch_enr(2024, use_cache = TRUE)
 
 # Your district's demographics
 enr %>%
