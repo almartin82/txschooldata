@@ -89,13 +89,14 @@ enr |>
   select(subgroup, n_students, pct)
 ```
 
-## Multi-Year Trends
+## Enrollment by Year
 
 ```{r multi-year}
-enr_multi <- fetch_enr_multi(2023:2024)
+# 2024 enrollment
+enr_2024 <- fetch_enr(2024)
 
-# State enrollment trend
-enr_multi |>
+# State total
+enr_2024 |>
   filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
   select(end_year, n_students)
 ```
@@ -114,22 +115,19 @@ enr_wide <- fetch_enr(2024, tidy = FALSE)
 library(ggplot2)
 library(scales)
 
-enr_multi <- fetch_enr_multi(2023:2024)
-
-# Demographics over time
-enr_multi |>
+# 2024 enrollment (reusing from previous chunk)
+enr_2024 |>
   filter(
     is_state,
     subgroup %in% c("white", "black", "hispanic", "asian"),
     grade_level == "TOTAL"
   ) |>
-  ggplot(aes(x = end_year, y = pct, color = subgroup)) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2) +
+  ggplot(aes(x = reorder(subgroup, -pct), y = pct, fill = subgroup)) +
+  geom_col() +
   scale_y_continuous(labels = percent_format()) +
   labs(
-    title = "Texas Public School Demographics",
-    x = "School Year", y = "Percent", color = NULL
+    title = "Texas Public School Demographics (2024)",
+    x = "Demographic Group", y = "Percent", fill = NULL
   ) +
   theme_minimal()
 ```
