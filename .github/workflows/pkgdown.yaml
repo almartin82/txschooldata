@@ -6,6 +6,9 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+  schedule:
+    # Run weekly on Sundays at 2am UTC to keep cache warm
+    - cron: '0 2 * * 0'
 
 name: pkgdown
 
@@ -43,7 +46,7 @@ jobs:
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
-        timeout-minutes: 45
+        timeout-minutes: 60
       - name: Deploy to GitHub pages
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.5.0
