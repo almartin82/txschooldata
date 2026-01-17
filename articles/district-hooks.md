@@ -15,7 +15,7 @@ enrollment data from 2020-2024.
 
 ``` r
 # Fetch 5 years of enrollment data
-enr <- fetch_enr_multi(2020:2024)
+enr <- fetch_enr_multi(2020:2024, use_cache = TRUE)
 ```
 
 ------------------------------------------------------------------------
@@ -535,7 +535,7 @@ library(txschooldata)
 library(dplyr)
 
 # Fetch 2024 data
-enr <- fetch_enr(2024)
+enr <- fetch_enr(2024, use_cache = TRUE)
 
 # Your district's demographics
 enr %>%
