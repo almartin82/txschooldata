@@ -44,7 +44,6 @@ reference:
   - fetch_enr_multi
   - fetch_grad
   - fetch_grad_multi
-  - fetch_staar
   - get_available_years
 
 - title: Process & Tidy
@@ -52,7 +51,6 @@ reference:
   contents:
   - tidy_enr
   - tidy_grad
-  - tidy_staar
   - id_enr_aggs
   - id_grad_aggs
   - enr_grade_aggs
@@ -63,28 +61,11 @@ reference:
   - cache_status
   - clear_cache
   - clear_directory_cache
-  - clear_staar_cache
 
 - title: Directory Data
   desc: Fetch school directory information
   contents:
   - fetch_directory
-  - clear_directory_cache
-  - get_raw_directory
-  - process_directory
-  - read_cache_directory
-  - write_cache_directory
-  - build_cache_path_directory
-  - build_directory_url
-  - cache_exists_directory
-
-- title: STAAR Data Helpers
-  desc: Helper functions for STAAR assessment data
-  contents:
-  - get_raw_staar
-  - process_staar
-  - staar_available_years
-  - get_staar_grades
 
 footer:
   structure:
