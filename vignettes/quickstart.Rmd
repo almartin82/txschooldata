@@ -11,7 +11,8 @@ vignette: >
 knitr::opts_chunk$set(
   echo = TRUE,
   message = FALSE,
-  warning = FALSE
+  warning = FALSE,
+  cache = TRUE
 )
 ```
 
@@ -29,7 +30,7 @@ library(txschooldata)
 library(dplyr)
 
 # Fetch 2024 data (2023-24 school year)
-enr <- fetch_enr(2024)
+enr <- fetch_enr(2024, use_cache = TRUE)
 ```
 
 Data is returned in **tidy (long) format** by default. Each row is one subgroup for one entity (state/district/campus).
