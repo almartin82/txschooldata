@@ -408,3 +408,9 @@ enr %>%
   filter(district_name == "YOUR DISTRICT NAME", grade_level == "TOTAL") %>%
   select(subgroup, n_students, pct)
 ```
+
+## Session Info
+
+```{r session-info}
+sessionInfo()
+```

@@ -317,3 +317,9 @@ https://rptsvr1.tea.texas.gov/perfreport/tapr/
 
 ### Update Schedule
 TEA releases TAPR data annually, typically in the fall following the end of a school year. The 2023-24 data (end_year = 2024) represents the most recent complete school year.
+
+## Session Info
+
+```{r session-info}
+sessionInfo()
+```
