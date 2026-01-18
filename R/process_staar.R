@@ -8,7 +8,7 @@
 # Key challenges:
 # - 2018: Uses r_ prefix, 5 LEP codes, no 504 indicators
 # - 2021-2022: Uses RLA_ prefix, 8 LEP codes, with 504 indicators
-# - 2023: Uses RLA_ prefix, same as 2021-2022
+# - 2023: Uses rla_ prefix (lowercase) for grades 4-8, RLA_ for grade 3; 8 LEP codes, with 504 indicators
 #
 # This function normalizes column names and selects key metrics for analysis.
 #
@@ -34,35 +34,40 @@ process_staar <- function(raw_data, year, level, grade) {
   if (year == 2018 || year %in% c(2021, 2022)) {
     # 2018, 2021-2022 use r_ prefix instead of RLA_
     names(df) <- gsub("^r_", "RLA_", names(df))
+  }
 
-    # 2018 has 5 LEP codes, missing 3: lept, lepr, lepe
-    # Add missing columns with NA if needed (only for 2018)
-    if (year == 2018) {
-      required_lep_cols <- c("RLA_lept_d", "RLA_lepr_d", "RLA_lepe_d",
-                             "RLA_lept_unsatgl_nm", "RLA_lepr_unsatgl_nm", "RLA_lepe_unsatgl_nm",
-                             "RLA_lept_approgl_nm", "RLA_lepr_approgl_nm", "RLA_lepe_approgl_nm",
-                             "RLA_lept_meetsgl_nm", "RLA_lepr_meetsgl_nm", "RLA_lepe_meetsgl_nm",
-                             "RLA_lept_mastrgl_nm", "RLA_lepr_mastrgl_nm", "RLA_lepe_mastrgl_nm",
-                             "m_lept_d", "m_lepr_d", "m_lepe_d",
-                             "m_lept_unsatgl_nm", "m_lepr_unsatgl_nm", "m_lepe_unsatgl_nm",
-                             "m_lept_approgl_nm", "m_lepr_approgl_nm", "m_lepe_approgl_nm",
-                             "m_lept_meetsgl_nm", "m_lepr_meetsgl_nm", "m_lepe_meetsgl_nm",
-                             "m_lept_mastrgl_nm", "m_lepr_mastrgl_nm", "m_lepe_mastrgl_nm")
+  # 2023 uses lowercase rla_ prefix for grades 4-8 (Grade 3 uses uppercase RLA_)
+  if (year == 2023) {
+    names(df) <- gsub("^rla_", "RLA_", names(df))
+  }
 
-      for (col in required_lep_cols) {
-        if (!col %in% names(df)) {
-          df[[col]] <- NA
-        }
+  # 2018 has 5 LEP codes, missing 3: lept, lepr, lepe
+  # Add missing columns with NA if needed (only for 2018)
+  if (year == 2018) {
+    required_lep_cols <- c("RLA_lept_d", "RLA_lepr_d", "RLA_lepe_d",
+                           "RLA_lept_unsatgl_nm", "RLA_lepr_unsatgl_nm", "RLA_lepe_unsatgl_nm",
+                           "RLA_lept_approgl_nm", "RLA_lepr_approgl_nm", "RLA_lepe_approgl_nm",
+                           "RLA_lept_meetsgl_nm", "RLA_lepr_meetsgl_nm", "RLA_lepe_meetsgl_nm",
+                           "RLA_lept_mastrgl_nm", "RLA_lepr_mastrgl_nm", "RLA_lepe_mastrgl_nm",
+                           "m_lept_d", "m_lepr_d", "m_lepe_d",
+                           "m_lept_unsatgl_nm", "m_lepr_unsatgl_nm", "m_lepe_unsatgl_nm",
+                           "m_lept_approgl_nm", "m_lepr_approgl_nm", "m_lepe_approgl_nm",
+                           "m_lept_meetsgl_nm", "m_lepr_meetsgl_nm", "m_lepe_meetsgl_nm",
+                           "m_lept_mastrgl_nm", "m_lepr_mastrgl_nm", "m_lepe_mastrgl_nm")
+
+    for (col in required_lep_cols) {
+      if (!col %in% names(df)) {
+        df[[col]] <- NA
       }
+    }
 
-      # 2018 also lacks 504 columns
-      required_504_cols <- c("RLA_y504_d", "RLA_n504_d", "RLA_v504_d",
-                             "m_y504_d", "m_n504_d", "m_v504_d")
+    # 2018 also lacks 504 columns
+    required_504_cols <- c("RLA_y504_d", "RLA_n504_d", "RLA_v504_d",
+                           "m_y504_d", "m_n504_d", "m_v504_d")
 
-      for (col in required_504_cols) {
-        if (!col %in% names(df)) {
-          df[[col]] <- NA
-        }
+    for (col in required_504_cols) {
+      if (!col %in% names(df)) {
+        df[[col]] <- NA
       }
     }
   }
@@ -173,8 +178,8 @@ safe_numeric_staar <- function(x) {
 #' @keywords internal
 reshape_to_long_format <- function(wide_data) {
 
-  # Select RLA columns
-  rla_cols <- grep("^rla_", names(wide_data), value = TRUE)
+  # Select RLA columns (case-insensitive to handle both rla_ and RLA_)
+  rla_cols <- grep("^rla_", names(wide_data), value = TRUE, ignore.case = TRUE)
 
   # Select Math columns
   math_cols <- grep("^math_", names(wide_data), value = TRUE)
@@ -184,7 +189,7 @@ reshape_to_long_format <- function(wide_data) {
 
   # Extract RLA row
   rla_data <- wide_data[, c(id_cols, rla_cols), drop = FALSE]
-  names(rla_data) <- gsub("^rla_", "", names(rla_data))
+  names(rla_data) <- gsub("^rla_", "", names(rla_data), ignore.case = TRUE)
   rla_data$subject <- "RLA"
 
   # Extract Math row
