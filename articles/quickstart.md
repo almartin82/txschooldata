@@ -14,13 +14,7 @@ library(txschooldata)
 library(dplyr)
 
 # Fetch 2024 data (2023-24 school year)
-enr <- fetch_enr(2024)
-
-# Statewide total enrollment
-enr |>
-  filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
-  select(n_students)
-#> 5,517,464 students
+enr <- fetch_enr(2024, use_cache = TRUE)
 ```
 
 Data is returned in **tidy (long) format** by default. Each row is one
@@ -62,13 +56,7 @@ enr |>
   filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL") |>
   arrange(desc(n_students)) |>
   select(district_name, n_students) |>
-  head(5)
-#>     district_name n_students
-#> 1     HOUSTON ISD     178,579
-#> 2      DALLAS ISD     134,624
-#> 3  FORT WORTH ISD      70,903
-#> 4 NORTHSIDE ISD      109,541
-#> 5      AUSTIN ISD      73,089
+  head(10)
 ```
 
 ## Demographics for One District
@@ -77,35 +65,24 @@ enr |>
 # Austin ISD demographics
 enr |>
   filter(
-    district_id == "227901",
+    district_id == "101912",
     is_district,
     grade_level == "TOTAL",
     subgroup != "total_enrollment"
   ) |>
   arrange(desc(n_students)) |>
-  select(subgroup, n_students, pct) |>
-  head(5)
-#>      subgroup n_students  pct
-#> 1    hispanic     39,445 0.54
-#> 2       white     16,162 0.22
-#> 3       black      5,847 0.08
-#> 4       asian      3,950 0.05
-#> 5  multiracial     3,684 0.05
+  select(subgroup, n_students, pct)
 ```
 
 ## Multi-Year Trends
 
 ``` r
-enr_multi <- fetch_enr_multi(2022:2024)
+enr_multi <- fetch_enr_multi(2020:2024, use_cache = TRUE)
 
 # State enrollment trend
 enr_multi |>
   filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
   select(end_year, n_students)
-#>   end_year n_students
-#> 1     2022    5402928
-#> 2     2023    5504150
-#> 3     2024    5517464
 ```
 
 ## Wide Format
@@ -113,7 +90,7 @@ enr_multi |>
 For one column per demographic:
 
 ``` r
-enr_wide <- fetch_enr(2024, tidy = FALSE)
+enr_wide <- fetch_enr(2024, tidy = FALSE, use_cache = TRUE)
 ```
 
 ## Visualization
@@ -122,7 +99,7 @@ enr_wide <- fetch_enr(2024, tidy = FALSE)
 library(ggplot2)
 library(scales)
 
-enr_multi <- fetch_enr_multi(2020:2024)
+enr_multi <- fetch_enr_multi(2020:2024, use_cache = TRUE)
 
 # Demographics over time
 enr_multi |>
@@ -168,10 +145,7 @@ clear_cache(2024)
 
 - See [10 Things You Didn’t Know About Texas
   Schools](https://almartin82.github.io/txschooldata/articles/district-hooks.md)
-  for detailed analysis with real data and visualizations
-- See [Data Quality
-  Analysis](https://almartin82.github.io/txschooldata/articles/data-quality-qa.md)
-  for state and district enrollment trends
+  for analysis examples
 - Use
   [`?fetch_enr`](https://almartin82.github.io/txschooldata/reference/fetch_enr.md)
   for complete function documentation
