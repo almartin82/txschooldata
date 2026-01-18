@@ -92,7 +92,7 @@ enr |>
 ## Multi-Year Trends
 
 ```{r multi-year}
-enr_multi <- fetch_enr_multi(2020:2024)
+enr_multi <- fetch_enr_multi(2020:2024, use_cache = TRUE)
 
 # State enrollment trend
 enr_multi |>
@@ -105,7 +105,7 @@ enr_multi |>
 For one column per demographic:
 
 ```{r wide}
-enr_wide <- fetch_enr(2024, tidy = FALSE)
+enr_wide <- fetch_enr(2024, tidy = FALSE, use_cache = TRUE)
 ```
 
 ## Visualization
@@ -114,7 +114,7 @@ enr_wide <- fetch_enr(2024, tidy = FALSE)
 library(ggplot2)
 library(scales)
 
-enr_multi <- fetch_enr_multi(2020:2024)
+enr_multi <- fetch_enr_multi(2020:2024, use_cache = TRUE)
 
 # Demographics over time
 enr_multi |>
@@ -144,7 +144,7 @@ enr_multi |>
 
 ## Cache Management
 
-```{r cache}
+```{r cache, eval=FALSE}
 # View cached files
 cache_status()
 
