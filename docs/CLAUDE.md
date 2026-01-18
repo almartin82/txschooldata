@@ -1,33 +1,112 @@
-# Claude Code Instructions for txschooldata
+# Claude Code Instructions
 
-## Commit and PR Guidelines
+## Git Commits and PRs
 
-- Do NOT include “Generated with Claude Code” in commit messages
-- Do NOT include “Co-Authored-By: Claude” in commit messages
-- Do NOT mention Claude or AI assistance in PR descriptions
-- Keep commit messages clean and professional
+- NEVER reference Claude, Claude Code, or AI assistance in commit
+  messages
+- NEVER reference Claude, Claude Code, or AI assistance in PR
+  descriptions
+- NEVER add Co-Authored-By lines mentioning Claude or Anthropic
+- Keep commit messages focused on what changed, not how it was written
 
-## Project Context
+------------------------------------------------------------------------
 
-This is an R package for fetching and processing Texas school data from
-the Texas Education Agency (TEA).
+## Git Workflow (REQUIRED)
 
-### Key Data Characteristics
+### Feature Branch + PR + Auto-Merge Policy
 
-- **Data Source**: Texas Education Agency (TEA) at
-  <https://tea.texas.gov/reports-and-data>
-- **ID System**:
-  - District IDs: 6 digits (e.g., 101912 for Austin ISD)
-  - Campus IDs: 9 digits (district ID + 3-digit campus number)
-- **Primary Data System**: PEIMS (Public Education Information
-  Management System)
-- **Number of Districts**: ~1,209
+**NEVER push directly to main.** All changes must go through PRs with
+auto-merge:
 
-## Package Structure
+``` bash
+# 1. Create feature branch
+git checkout -b fix/description-of-change
 
-The package follows the same patterns as ilschooldata: -
-`fetch_enrollment.R` - Main user-facing function -
-`get_raw_enrollment.R` - Download raw data from TEA -
-`process_enrollment.R` - Process raw data into standard schema -
-`tidy_enrollment.R` - Transform to long format - `cache.R` - Local
-caching functions
+# 2. Make changes, commit
+git add -A
+git commit -m "Fix: description of change"
+
+# 3. Push and create PR with auto-merge
+git push -u origin fix/description-of-change
+gh pr create --title "Fix: description" --body "Description of changes"
+gh pr merge --auto --squash
+
+# 4. Clean up stale branches after PR merges
+git checkout main && git pull && git fetch --prune origin
+```
+
+### Branch Cleanup (REQUIRED)
+
+**Clean up stale branches every time you touch this package:**
+
+``` bash
+# Delete local branches merged to main
+git branch --merged main | grep -v main | xargs -r git branch -d
+
+# Prune remote tracking branches
+git fetch --prune origin
+```
+
+### Auto-Merge Requirements
+
+PRs auto-merge when ALL CI checks pass: - R-CMD-check (0 errors, 0
+warnings) - Python tests (if py{st}schooldata exists) - pkgdown build
+(vignettes must render)
+
+If CI fails, fix the issue and push - auto-merge triggers when checks
+pass.
+
+------------------------------------------------------------------------
+
+## Local Testing Before PRs (REQUIRED)
+
+**PRs will not be merged until CI passes.** Run these checks locally
+BEFORE opening a PR:
+
+### CI Checks That Must Pass
+
+| Check        | Local Command                                                                  | What It Tests                                  |
+|--------------|--------------------------------------------------------------------------------|------------------------------------------------|
+| R-CMD-check  | [`devtools::check()`](https://devtools.r-lib.org/reference/check.html)         | Package builds, tests pass, no errors/warnings |
+| Python tests | `pytest tests/test_pytxschooldata.py -v`                                       | Python wrapper works correctly                 |
+| pkgdown      | [`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html) | Documentation and vignettes render             |
+
+### Quick Commands
+
+``` r
+# R package check (required)
+devtools::check()
+
+# Python tests (required)
+system("pip install -e ./pytxschooldata && pytest tests/test_pytxschooldata.py -v")
+
+# pkgdown build (required)
+pkgdown::build_site()
+```
+
+### Pre-PR Checklist
+
+Before opening a PR, verify: - \[ \]
+[`devtools::check()`](https://devtools.r-lib.org/reference/check.html) —
+0 errors, 0 warnings - \[ \] `pytest tests/test_pytxschooldata.py` — all
+tests pass - \[ \]
+[`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html)
+— builds without errors - \[ \] Vignettes render (no `eval=FALSE` hacks)
+
+------------------------------------------------------------------------
+
+## README Images from Vignettes (REQUIRED)
+
+**NEVER use `man/figures/` or `generate_readme_figs.R` for README
+images.**
+
+README images MUST come from pkgdown-generated vignette output so they
+auto-update on merge:
+
+``` markdown
+![Chart name](https://almartin82.github.io/{package}/articles/{vignette}_files/figure-html/{chunk-name}-1.png)
+```
+
+**Why:** Vignette figures regenerate automatically when pkgdown builds.
+Manual `man/figures/` requires running a separate script and is easy to
+forget, causing stale/broken images.

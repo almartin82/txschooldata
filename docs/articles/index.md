@@ -4,5 +4,7 @@
 
 - [Data Quality
   Analysis](https://almartin82.github.io/txschooldata/articles/data-quality-qa.md):
+- [10 Things You Didn't Know About Texas
+  Schools](https://almartin82.github.io/txschooldata/articles/district-hooks.md):
 - [Getting Started with
   txschooldata](https://almartin82.github.io/txschooldata/articles/quickstart.md):
