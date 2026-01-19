@@ -40,3 +40,9 @@
 #' @keywords internal
 "_PACKAGE"
 
+# Avoid R CMD check NOTEs for tidyverse column references
+utils::globalVariables(c(
+  "campus_id", "charter_flag", "district_id", "grade_level", "n_students",
+  "performance_level", "row_total", "student_group", "subgroup", "subject",
+  "type", "year"
+))
