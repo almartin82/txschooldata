@@ -156,3 +156,9 @@ clear_cache(2024)
 
 - See [10 Things You Didn't Know About Texas Schools](district-hooks.html) for analysis examples
 - Use `?fetch_enr` for complete function documentation
+
+## Session Info
+
+```{r session-info, eval=TRUE}
+sessionInfo()
+```
