@@ -397,6 +397,14 @@ All data is fetched directly from TEA servers—no manual downloads required.
 - **Column names:** Standardized across years, but underlying TEA variable names differ between systems
 - **Historical comparisons:** Definition of "economically disadvantaged" and other categories may shift over time
 
+## Part of the State Schooldata Project
+
+This package is part of the [njschooldata](https://github.com/almartin82/njschooldata) family of packages providing consistent access to state education data.
+
+A simple, consistent interface for accessing state-published school data in Python and R.
+
+**All 50 state packages:** [github.com/almartin82](https://github.com/almartin82?tab=repositories&q=schooldata)
+
 ## License
 
 MIT
