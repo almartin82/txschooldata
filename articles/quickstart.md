@@ -74,7 +74,7 @@ enr |>
   select(subgroup, n_students, pct)
 ```
 
-## Multi-Year Trends
+## Enrollment by Year
 
 ``` r
 enr_multi <- fetch_enr_multi(2020:2024, use_cache = TRUE)
@@ -99,22 +99,19 @@ enr_wide <- fetch_enr(2024, tidy = FALSE, use_cache = TRUE)
 library(ggplot2)
 library(scales)
 
-enr_multi <- fetch_enr_multi(2020:2024, use_cache = TRUE)
-
-# Demographics over time
+# Demographics over time (using enr_multi from above)
 enr_multi |>
   filter(
     is_state,
     subgroup %in% c("white", "black", "hispanic", "asian"),
     grade_level == "TOTAL"
   ) |>
-  ggplot(aes(x = end_year, y = pct, color = subgroup)) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2) +
+  ggplot(aes(x = reorder(subgroup, -pct), y = pct, fill = subgroup)) +
+  geom_col() +
   scale_y_continuous(labels = percent_format()) +
   labs(
-    title = "Texas Public School Demographics",
-    x = "School Year", y = "Percent", color = NULL
+    title = "Texas Public School Demographics (2024)",
+    x = "Demographic Group", y = "Percent", fill = NULL
   ) +
   theme_minimal()
 ```
@@ -178,7 +175,7 @@ sessionInfo()
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] digest_0.6.39     desc_1.4.3        R6_2.6.1          fastmap_1.2.0    
-    ##  [5] xfun_0.55         cachem_1.1.0      knitr_1.51        htmltools_0.5.9  
+    ##  [5] xfun_0.56         cachem_1.1.0      knitr_1.51        htmltools_0.5.9  
     ##  [9] rmarkdown_2.30    lifecycle_1.0.5   cli_3.6.5         sass_0.4.10      
     ## [13] pkgdown_2.2.0     textshaping_1.0.4 jquerylib_0.1.4   systemfonts_1.3.1
     ## [17] compiler_4.5.2    tools_4.5.2       ragg_1.5.0        evaluate_1.0.5   

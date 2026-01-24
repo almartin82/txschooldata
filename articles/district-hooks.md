@@ -15,7 +15,7 @@ enrollment data from 2020-2024.
 
 ``` r
 # Fetch 5 years of enrollment data
-enr <- fetch_enr_multi(2020:2024, use_cache = TRUE)
+enr <- fetch_enr_multi(2020:2024, use_eval = FALSE)
 ```
 
 ------------------------------------------------------------------------
@@ -40,13 +40,6 @@ state_trend <- enr %>%
 print(state_trend)
 ```
 
-    ##   end_year n_students  change pct_change
-    ## 1     2020    5479173      NA         NA
-    ## 2     2021    5359040 -120133      -2.19
-    ## 3     2022    5402928   43888       0.82
-    ## 4     2023    5504150  101222       1.87
-    ## 5     2024    5517464   13314       0.24
-
 ``` r
 ggplot(state_trend, aes(x = end_year, y = n_students)) +
   geom_line(linewidth = 1.2, color = "#003366") +
@@ -63,8 +56,6 @@ ggplot(state_trend, aes(x = end_year, y = n_students)) +
   ) +
   theme_minimal()
 ```
-
-![](district-hooks_files/figure-html/covid-plot-1.png)
 
 Enrollment has since recovered, surpassing pre-pandemic levels by 2023.
 But the demographic composition of that recovery tells a very different
@@ -87,13 +78,6 @@ lep_trend <- enr %>%
 print(lep_trend %>% select(end_year, n_students, pct_display))
 ```
 
-    ##   end_year n_students pct_display
-    ## 1     2020    1112674        20.3
-    ## 2     2021    1108207        20.7
-    ## 3     2022    1171661        21.7
-    ## 4     2023    1269408        23.1
-    ## 5     2024    1344804        24.4
-
 ``` r
 ggplot(lep_trend, aes(x = end_year, y = pct * 100)) +
   geom_line(linewidth = 1.2, color = "#E69F00") +
@@ -108,8 +92,6 @@ ggplot(lep_trend, aes(x = end_year, y = pct * 100)) +
   ) +
   theme_minimal()
 ```
-
-![](district-hooks_files/figure-html/lep-plot-1.png)
 
 This has profound implications for staffing, curriculum, and resource
 allocation across the state. Schools need more ESL teachers, bilingual
@@ -143,18 +125,6 @@ asian_top <- enr %>%
 print(asian_top)
 ```
 
-    ##     district_name total n_students  pct
-    ## 1     COPPELL ISD 13394       7591 56.7
-    ## 2      FRISCO ISD 66551      28349 42.6
-    ## 3     PROSPER ISD 28394       8312 29.3
-    ## 4       ALLEN ISD 21319       6201 29.1
-    ## 5   FORT BEND ISD 80034      22080 27.6
-    ## 6       PLANO ISD 47753      11207 23.5
-    ## 7  ROUND ROCK ISD 46042      10126 22.0
-    ## 8        KATY ISD 94589      16311 17.2
-    ## 9       WYLIE ISD 19166       3227 16.8
-    ## 10 LEWISVILLE ISD 48356       8123 16.8
-
 ``` r
 # Frisco's Asian population growth
 frisco_asian <- enr %>%
@@ -175,8 +145,6 @@ ggplot(frisco_asian, aes(x = end_year, y = pct)) +
   ) +
   theme_minimal()
 ```
-
-![](district-hooks_files/figure-html/frisco-trend-1.png)
 
 These districts in the Dallas-Fort Worth metroplex reflect changing
 immigration and migration patterns, with significant growth in families
@@ -218,18 +186,6 @@ losses %>%
   head(10)
 ```
 
-    ##      district_name n_2020 n_2024 change pct_change
-    ## 1   FORT WORTH ISD  82704  70903 -11801      -14.3
-    ## 2       ALDINE ISD  67130  57737  -9393      -14.0
-    ## 3  BROWNSVILLE ISD  42989  37032  -5957      -13.9
-    ## 4   HARLANDALE ISD  13654  11781  -1873      -13.7
-    ## 5       YSLETA ISD  40404  34875  -5529      -13.7
-    ## 6       LAREDO ISD  23665  20557  -3108      -13.1
-    ## 7        ALIEF ISD  45281  39451  -5830      -12.9
-    ## 8      HOUSTON ISD 209309 183603 -25706      -12.3
-    ## 9      LA JOYA ISD  27276  23995  -3281      -12.0
-    ## 10     ABILENE ISD  16456  14482  -1974      -12.0
-
 Houston ISD’s absolute loss of **25,706 students** represents more
 students than 90% of Texas districts even enroll.
 
@@ -251,12 +207,6 @@ idea <- enr %>%
 print(idea)
 ```
 
-    ##   end_year n_students
-    ## 1     2021      62158
-    ## 2     2022      67988
-    ## 3     2023      74217
-    ## 4     2024      76819
-
 ``` r
 # Top growing large districts
 growth <- losses %>%
@@ -267,18 +217,6 @@ growth %>%
   select(district_name, n_2020, n_2024, change, pct_change) %>%
   head(10)
 ```
-
-    ##                  district_name n_2020 n_2024 change pct_change
-    ## 1               HALLSVILLE ISD  11452  21266   9814       85.7
-    ## 2                  PROSPER ISD  16789  28394  11605       69.1
-    ## 3                PRINCETON ISD   5414   8671   3257       60.2
-    ## 4                CLEVELAND ISD   7559  11945   4386       58.0
-    ## 5          IDEA PUBLIC SCHOOLS  49480  76819  27339       55.3
-    ## 6            MEDINA VALLEY ISD   5847   8656   2809       48.0
-    ## 7         PREMIER HIGH SCHOOLS   5345   7819   2474       46.3
-    ## 8  YES PREP PUBLIC SCHOOLS INC  12074  17622   5548       45.9
-    ## 9                   FORNEY ISD  11944  16962   5018       42.0
-    ## 10              ROYSE CITY ISD   6585   9338   2753       41.8
 
 Charter networks and suburban districts are absorbing students from
 declining urban districts, fundamentally reshaping Texas public
@@ -304,14 +242,6 @@ fb_demo <- enr %>%
 print(fb_demo)
 ```
 
-    ## # A tibble: 4 × 5
-    ##   end_year white black hispanic asian
-    ##      <int> <dbl> <dbl>    <dbl> <dbl>
-    ## 1     2021  14.8  27.5     26.4  27.3
-    ## 2     2022  14.7  27.8     26.6  26.7
-    ## 3     2023  13.8  27.8     26.7  27.3
-    ## 4     2024  13.2  27.8     26.7  27.6
-
 ``` r
 # Fort Bend demographics over time
 enr %>%
@@ -333,8 +263,6 @@ enr %>%
   theme_minimal() +
   theme(legend.position = "bottom")
 ```
-
-![](district-hooks_files/figure-html/diversity-chart-1.png)
 
 ------------------------------------------------------------------------
 
@@ -358,16 +286,6 @@ grade_trend <- enr %>%
 print(grade_trend)
 ```
 
-    ## # A tibble: 6 × 8
-    ##   grade_level `2020` `2021` `2022` `2023` `2024` change pct_change
-    ##   <chr>        <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>      <dbl>
-    ## 1 PK          248413 196560 222767 243493 247979   -434       -0.2
-    ## 2 K           383585 360865 370054 367180 361329 -22256       -5.8
-    ## 3 01          391175 380973 384494 399048 385096  -6079       -1.6
-    ## 4 05          417272 395436 387945 395111 399200 -18072       -4.3
-    ## 5 09          448929 436396 475437 477875 472595  23666        5.3
-    ## 6 12          352258 362888 360056 364317 365788  13530        3.8
-
 Pre-K also dropped, while high school grades grew. The pipeline is
 narrowing at the entry point—a trend that will ripple through the system
 for years.
@@ -388,13 +306,6 @@ econ_trend <- enr %>%
 print(econ_trend)
 ```
 
-    ##   end_year n_students  pct
-    ## 1     2020    3303974 60.3
-    ## 2     2021    3229178 60.3
-    ## 3     2022    3278452 60.7
-    ## 4     2023    3415987 62.1
-    ## 5     2024    3434955 62.3
-
 ``` r
 ggplot(econ_trend, aes(x = end_year, y = pct)) +
   geom_col(fill = "#56B4E9", width = 0.6) +
@@ -408,8 +319,6 @@ ggplot(econ_trend, aes(x = end_year, y = pct)) +
   ) +
   theme_minimal()
 ```
-
-![](district-hooks_files/figure-html/econ-plot-1.png)
 
 Some large districts serve even higher concentrations of low-income
 students.
@@ -433,15 +342,6 @@ demo_shift <- enr %>%
 print(demo_shift)
 ```
 
-    ## # A tibble: 5 × 6
-    ##   end_year white black hispanic asian multiracial
-    ##      <int> <dbl> <dbl>    <dbl> <dbl>       <dbl>
-    ## 1     2020  27    12.6     52.8   4.6         2.5
-    ## 2     2021  26.5  12.7     52.9   4.7         2.7
-    ## 3     2022  26.3  12.8     52.8   4.8         2.9
-    ## 4     2023  25.6  12.8     53     5.1         3  
-    ## 5     2024  25    12.8     53.2   5.4         3.1
-
 ``` r
 enr %>%
   filter(is_state, grade_level == "TOTAL",
@@ -464,8 +364,6 @@ enr %>%
   theme(legend.position = "bottom")
 ```
 
-![](district-hooks_files/figure-html/demo-plot-1.png)
-
 ------------------------------------------------------------------------
 
 ## 10. 439 Districts Now Have Hispanic Majorities
@@ -487,15 +385,6 @@ hisp_majority <- enr %>%
 
 print(hisp_majority)
 ```
-
-    ## # A tibble: 5 × 4
-    ##   end_year total_districts hispanic_majority pct_majority
-    ##      <int>           <int>             <int>        <dbl>
-    ## 1     2020            1202               419         34.9
-    ## 2     2021            1204               428         35.5
-    ## 3     2022            1207               433         35.9
-    ## 4     2023            1209               438         36.2
-    ## 5     2024            1207               439         36.4
 
 29 districts flipped from non-majority to Hispanic majority between 2020
 and 2024.
@@ -535,7 +424,7 @@ library(txschooldata)
 library(dplyr)
 
 # Fetch 2024 data
-enr <- fetch_enr(2024, use_cache = TRUE)
+enr <- fetch_enr(2024, use_eval = FALSE)
 
 # Your district's demographics
 enr %>%
@@ -548,40 +437,3 @@ enr %>%
 ``` r
 sessionInfo()
 ```
-
-    ## R version 4.5.2 (2025-10-31)
-    ## Platform: x86_64-pc-linux-gnu
-    ## Running under: Ubuntu 24.04.3 LTS
-    ## 
-    ## Matrix products: default
-    ## BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-    ## LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
-    ## 
-    ## locale:
-    ##  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
-    ##  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
-    ##  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
-    ## [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
-    ## 
-    ## time zone: UTC
-    ## tzcode source: system (glibc)
-    ## 
-    ## attached base packages:
-    ## [1] stats     graphics  grDevices utils     datasets  methods   base     
-    ## 
-    ## other attached packages:
-    ## [1] scales_1.4.0       ggplot2_4.0.1      tidyr_1.3.2        dplyr_1.1.4       
-    ## [5] txschooldata_0.1.0
-    ## 
-    ## loaded via a namespace (and not attached):
-    ##  [1] gtable_0.3.6       jsonlite_2.0.0     compiler_4.5.2     tidyselect_1.2.1  
-    ##  [5] jquerylib_0.1.4    systemfonts_1.3.1  textshaping_1.0.4  yaml_2.3.12       
-    ##  [9] fastmap_1.2.0      R6_2.6.1           labeling_0.4.3     generics_0.1.4    
-    ## [13] knitr_1.51         tibble_3.3.1       desc_1.4.3         bslib_0.9.0       
-    ## [17] pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.1.7        utf8_1.2.6        
-    ## [21] cachem_1.1.0       xfun_0.55          fs_1.6.6           sass_0.4.10       
-    ## [25] S7_0.2.1           cli_3.6.5          withr_3.0.2        pkgdown_2.2.0     
-    ## [29] magrittr_2.0.4     digest_0.6.39      grid_4.5.2         rappdirs_0.3.4    
-    ## [33] lifecycle_1.0.5    vctrs_0.7.0        evaluate_1.0.5     glue_1.8.0        
-    ## [37] farver_2.1.2       codetools_0.2-20   ragg_1.5.0         rmarkdown_2.30    
-    ## [41] purrr_1.2.1        tools_4.5.2        pkgconfig_2.0.3    htmltools_0.5.9

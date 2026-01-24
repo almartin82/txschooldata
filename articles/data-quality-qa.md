@@ -27,7 +27,7 @@ library(scales)
 ``` r
 # Download enrollment data for available years
 years <- 2020:2024
-enr_multi <- fetch_enr_multi(years, use_cache = TRUE)
+enr_multi <- fetch_enr_multi(years, use_eval = FALSE)
 
 # State-level total enrollment by year
 state_totals <- enr_multi %>%
@@ -37,13 +37,6 @@ state_totals <- enr_multi %>%
 
 print(state_totals)
 ```
-
-    ##   end_year n_students
-    ## 1     2020    5479173
-    ## 2     2021    5359040
-    ## 3     2022    5402928
-    ## 4     2023    5504150
-    ## 5     2024    5517464
 
 ### Statewide Enrollment Trend
 
@@ -67,8 +60,6 @@ state_totals %>%
   )
 ```
 
-![](data-quality-qa_files/figure-html/state-trend-plot-1.png)
-
 ### Year-over-Year Changes
 
 ``` r
@@ -82,15 +73,7 @@ state_changes <- state_totals %>%
   filter(!is.na(prev_year))
 
 print(state_changes)
-```
 
-    ##   end_year n_students prev_year  change pct_change
-    ## 1     2021    5359040   5479173 -120133 -2.1925389
-    ## 2     2022    5402928   5359040   43888  0.8189526
-    ## 3     2023    5504150   5402928  101222  1.8734656
-    ## 4     2024    5517464   5504150   13314  0.2418902
-
-``` r
 # Flag any jumps greater than 5%
 large_changes <- state_changes %>%
   filter(abs(pct_change) > 5)
@@ -102,9 +85,6 @@ if (nrow(large_changes) > 0) {
   cat("\n** All year-over-year changes are within +/- 5% threshold.\n")
 }
 ```
-
-    ## 
-    ## ** All year-over-year changes are within +/- 5% threshold.
 
 ## Major District Analysis
 
@@ -145,13 +125,6 @@ current_enrollment <- district_trends %>%
 print(current_enrollment)
 ```
 
-    ##   end_year district_id  district_label n_students
-    ## 1     2024      101912     Houston ISD     183603
-    ## 2     2024      057905      Dallas ISD     139096
-    ## 3     2024      227901      Austin ISD      72739
-    ## 4     2024      220905  Fort Worth ISD      70903
-    ## 5     2024      015907 San Antonio ISD      44635
-
 ### District Enrollment Trends
 
 ``` r
@@ -177,8 +150,6 @@ district_trends %>%
   )
 ```
 
-![](data-quality-qa_files/figure-html/district-trend-plot-1.png)
-
 ### District Year-over-Year Changes
 
 ``` r
@@ -198,18 +169,7 @@ district_change_summary <- district_changes %>%
   tidyr::pivot_wider(names_from = end_year, values_from = pct_change)
 
 print(district_change_summary)
-```
 
-    ## # A tibble: 5 × 5
-    ##   district_label  `2021` `2022` `2023` `2024`
-    ##   <chr>            <dbl>  <dbl>  <dbl>  <dbl>
-    ## 1 Austin ISD       -7.42  -3.8    1.83  -0.63
-    ## 2 Dallas ISD       -5.64  -1.15  -1.66  -1.38
-    ## 3 Fort Worth ISD   -7.19  -3.16  -2.27  -2.39
-    ## 4 Houston ISD      -6.1   -1.44  -2.29  -3   
-    ## 5 San Antonio ISD  -5.6   -2.65   1.44  -1.28
-
-``` r
 # Flag large changes
 large_district_changes <- district_changes %>%
   filter(abs(pct_change) > 5)
@@ -222,17 +182,6 @@ if (nrow(large_district_changes) > 0) {
   cat("\n** All major district changes are within +/- 5% threshold.\n")
 }
 ```
-
-    ## 
-    ## ** DATA QUALITY ALERT: District changes exceeding 5%:
-    ## # A tibble: 5 × 5
-    ##   district_label  end_year n_students change pct_change
-    ##   <chr>              <int>      <dbl>  <dbl>      <dbl>
-    ## 1 Austin ISD          2021      74725  -5993      -7.42
-    ## 2 Dallas ISD          2021     145105  -8679      -5.64
-    ## 3 Fort Worth ISD      2021      76754  -5950      -7.19
-    ## 4 Houston ISD         2021     196550 -12759      -6.1 
-    ## 5 San Antonio ISD     2021      45780  -2715      -5.6
 
 ## Demographic Breakdown Validation
 
@@ -258,24 +207,10 @@ race_sum <- state_2024 %>%
   pull(sum)
 
 cat("Total Enrollment:", comma(total), "\n")
-```
-
-    ## Total Enrollment: 5,517,464
-
-``` r
 cat("Sum of Race/Ethnicity Groups:", comma(race_sum), "\n")
-```
-
-    ## Sum of Race/Ethnicity Groups: 5,517,464
-
-``` r
 cat("Difference:", comma(total - race_sum),
     "(", round((total - race_sum) / total * 100, 2), "%)\n")
-```
 
-    ## Difference: 0 ( 0 %)
-
-``` r
 # This difference may be due to students with unknown race/ethnicity
 if (abs(total - race_sum) / total > 0.05) {
   cat("\n** DATA QUALITY NOTE: Race/ethnicity categories don't sum to total.\n")
@@ -301,24 +236,10 @@ grade_sum <- enr_multi %>%
   pull(sum)
 
 cat("Total Enrollment:", comma(total), "\n")
-```
-
-    ## Total Enrollment: 5,517,464
-
-``` r
 cat("Sum of Grade Levels:", comma(grade_sum), "\n")
-```
-
-    ## Sum of Grade Levels: 5,517,464
-
-``` r
 cat("Difference:", comma(total - grade_sum),
     "(", round((total - grade_sum) / total * 100, 2), "%)\n")
-```
 
-    ## Difference: 0 ( 0 %)
-
-``` r
 if (abs(total - grade_sum) / total > 0.05) {
   cat("\n** DATA QUALITY NOTE: Grade levels don't sum to total.\n")
   cat("   This may indicate ungraded students or data reporting differences.\n")
@@ -350,37 +271,13 @@ if (nrow(large_district_changes) > 0) {
 
 # Print summary
 cat("=== Data Quality Summary ===\n\n")
-```
-
-    ## === Data Quality Summary ===
-
-``` r
 cat("Years Analyzed:", min(years), "-", max(years), "\n")
-```
-
-    ## Years Analyzed: 2020 - 2024
-
-``` r
 cat("Total State Records:", comma(nrow(enr_multi)), "\n")
-```
-
-    ## Total State Records: 1,281,090
-
-``` r
 cat("Districts in Dataset:",
     enr_multi %>% filter(is_district) %>% distinct(district_id) %>% nrow(), "\n")
-```
-
-    ## Districts in Dataset: 1216
-
-``` r
 cat("Campuses in Dataset:",
     enr_multi %>% filter(is_campus) %>% distinct(campus_id) %>% nrow(), "\n\n")
-```
 
-    ## Campuses in Dataset: 9540
-
-``` r
 if (length(issues) > 0) {
   cat("Issues Found:\n")
   for (issue in issues) {
@@ -390,9 +287,6 @@ if (length(issues) > 0) {
   cat("No major data quality issues identified.\n")
 }
 ```
-
-    ## Issues Found:
-    ##   - Major district changes >5%: 5 instances
 
 ## Notes
 
@@ -430,42 +324,3 @@ recent complete school year.
 ``` r
 sessionInfo()
 ```
-
-    ## R version 4.5.2 (2025-10-31)
-    ## Platform: x86_64-pc-linux-gnu
-    ## Running under: Ubuntu 24.04.3 LTS
-    ## 
-    ## Matrix products: default
-    ## BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-    ## LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
-    ## 
-    ## locale:
-    ##  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
-    ##  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
-    ##  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
-    ## [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
-    ## 
-    ## time zone: UTC
-    ## tzcode source: system (glibc)
-    ## 
-    ## attached base packages:
-    ## [1] stats     graphics  grDevices utils     datasets  methods   base     
-    ## 
-    ## other attached packages:
-    ## [1] scales_1.4.0       ggplot2_4.0.1      dplyr_1.1.4        txschooldata_0.1.0
-    ## 
-    ## loaded via a namespace (and not attached):
-    ##  [1] utf8_1.2.6         rappdirs_0.3.4     sass_0.4.10        generics_0.1.4    
-    ##  [5] tidyr_1.3.2        hms_1.1.4          digest_0.6.39      magrittr_2.0.4    
-    ##  [9] evaluate_1.0.5     grid_4.5.2         RColorBrewer_1.1-3 fastmap_1.2.0     
-    ## [13] jsonlite_2.0.0     httr_1.4.7         purrr_1.2.1        codetools_0.2-20  
-    ## [17] textshaping_1.0.4  jquerylib_0.1.4    cli_3.6.5          rlang_1.1.7       
-    ## [21] crayon_1.5.3       bit64_4.6.0-1      withr_3.0.2        cachem_1.1.0      
-    ## [25] yaml_2.3.12        tools_4.5.2        parallel_4.5.2     tzdb_0.5.0        
-    ## [29] curl_7.0.0         vctrs_0.7.0        R6_2.6.1           lifecycle_1.0.5   
-    ## [33] fs_1.6.6           bit_4.6.0          vroom_1.6.7        ragg_1.5.0        
-    ## [37] pkgconfig_2.0.3    desc_1.4.3         pkgdown_2.2.0      pillar_1.11.1     
-    ## [41] bslib_0.9.0        gtable_0.3.6       glue_1.8.0         systemfonts_1.3.1 
-    ## [45] xfun_0.55          tibble_3.3.1       tidyselect_1.2.1   knitr_1.51        
-    ## [49] farver_2.1.2       htmltools_0.5.9    rmarkdown_2.30     labeling_0.4.3    
-    ## [53] readr_2.1.6        compiler_4.5.2     S7_0.2.1
