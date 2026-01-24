@@ -27,8 +27,9 @@ Suggests:
     knitr,
     rmarkdown,
     ggplot2,
-    scales
-VignetteBuilder: knitr
+    scales,
+    R.rsp
+VignetteBuilder: R.rsp
 Config/testthat/edition: 3
 URL: https://almartin82.github.io/txschooldata/, https://github.com/almartin82/txschooldata
 BugReports: https://github.com/almartin82/txschooldata/issues

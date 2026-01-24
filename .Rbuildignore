@@ -17,3 +17,4 @@
 ^generate_readme_figs\.R$
 ^test-load\.R$
 ^vignettes/.*_cache$
+^vignettes/.*\.Rmd\.source$
