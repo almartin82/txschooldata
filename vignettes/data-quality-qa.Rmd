@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   warning = FALSE,
   fig.width = 8,
   fig.height = 5,
-  cache = TRUE
+  eval = FALSE
 )
 ```
 
@@ -40,7 +40,7 @@ library(scales)
 ```{r download-multi-year, cache=TRUE}
 # Download enrollment data for available years
 years <- 2020:2024
-enr_multi <- fetch_enr_multi(years, use_cache = TRUE)
+enr_multi <- fetch_enr_multi(years, use_eval = FALSE)
 
 # State-level total enrollment by year
 state_totals <- enr_multi %>%

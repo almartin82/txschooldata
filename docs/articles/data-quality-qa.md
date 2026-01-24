@@ -200,14 +200,14 @@ district_change_summary <- district_changes %>%
 print(district_change_summary)
 ```
 
-    ## # A tibble: 5 × 2
-    ##   district_label  `2024`
-    ##   <chr>            <dbl>
-    ## 1 Austin ISD       -9.89
-    ## 2 Dallas ISD       -9.55
-    ## 3 Fort Worth ISD  -14.3 
-    ## 4 Houston ISD     -12.3 
-    ## 5 San Antonio ISD  -7.96
+    ## # A tibble: 5 × 5
+    ##   district_label  `2021` `2022` `2023` `2024`
+    ##   <chr>            <dbl>  <dbl>  <dbl>  <dbl>
+    ## 1 Austin ISD       -7.42  -3.8    1.83  -0.63
+    ## 2 Dallas ISD       -5.64  -1.15  -1.66  -1.38
+    ## 3 Fort Worth ISD   -7.19  -3.16  -2.27  -2.39
+    ## 4 Houston ISD      -6.1   -1.44  -2.29  -3   
+    ## 5 San Antonio ISD  -5.6   -2.65   1.44  -1.28
 
 ``` r
 # Flag large changes
@@ -228,11 +228,11 @@ if (nrow(large_district_changes) > 0) {
     ## # A tibble: 5 × 5
     ##   district_label  end_year n_students change pct_change
     ##   <chr>              <dbl>      <dbl>  <dbl>      <dbl>
-    ## 1 Austin ISD          2024      72739  -7979      -9.89
-    ## 2 Dallas ISD          2024     139096 -14688      -9.55
-    ## 3 Fort Worth ISD      2024      70903 -11801     -14.3 
-    ## 4 Houston ISD         2024     183603 -25706     -12.3 
-    ## 5 San Antonio ISD     2024      44635  -3860      -7.96
+    ## 1 Austin ISD          2021      74725  -5993      -7.42
+    ## 2 Dallas ISD          2021     145105  -8679      -5.64
+    ## 3 Fort Worth ISD      2021      76754  -5950      -7.19
+    ## 4 Houston ISD         2021     196550 -12759      -6.1 
+    ## 5 San Antonio ISD     2021      45780  -2715      -5.6
 
 ## Demographic Breakdown Validation
 
@@ -371,14 +371,14 @@ cat("Districts in Dataset:",
     enr_multi %>% filter(is_district) %>% distinct(district_id) %>% nrow(), "\n")
 ```
 
-    ## Districts in Dataset: 2428
+    ## Districts in Dataset: 1216
 
 ``` r
 cat("Campuses in Dataset:",
     enr_multi %>% filter(is_campus) %>% distinct(campus_id) %>% nrow(), "\n\n")
 ```
 
-    ## Campuses in Dataset: 18756
+    ## Campuses in Dataset: 9540
 
 ``` r
 if (length(issues) > 0) {
