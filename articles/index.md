@@ -7,7 +7,7 @@
 
 ### Featured Analysis
 
-- [10 Things You Didn't Know About Texas
+- [15 Things You Didn't Know About Texas
   Schools](https://almartin82.github.io/txschooldata/articles/district-hooks.md):
 
 ### Data Quality
