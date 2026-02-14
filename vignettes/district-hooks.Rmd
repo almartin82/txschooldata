@@ -8,13 +8,19 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
+data_available <- tryCatch({
+  test <- txschooldata::fetch_enr(2024, use_cache = TRUE)
+  nrow(test) > 0
+}, error = function(e) FALSE)
+
 knitr::opts_chunk$set(
   echo = TRUE,
   message = FALSE,
   warning = FALSE,
   fig.width = 8,
   fig.height = 5,
-  eval = FALSE
+  eval = data_available,
+  cache = TRUE
 )
 ```
 
@@ -30,7 +36,7 @@ Texas public schools enroll over 5.5 million students across 1,200+ districts, m
 
 ```{r fetch-data, cache=TRUE}
 # Fetch 5 years of enrollment data
-enr <- fetch_enr_multi(2020:2024, use_eval = FALSE)
+enr <- fetch_enr_multi(2020:2024, use_cache = TRUE)
 ```
 
 ---
@@ -580,7 +586,7 @@ library(txschooldata)
 library(dplyr)
 
 # Fetch 2024 data
-enr <- fetch_enr(2024, use_eval = FALSE)
+enr <- fetch_enr(2024, use_cache = TRUE)
 
 # Your district's demographics
 enr %>%
