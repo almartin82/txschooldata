@@ -13,21 +13,26 @@ Tests](https://github.com/almartin82/txschooldata/actions/workflows/python-test.
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-An R package for fetching and processing Texas school enrollment and
-assessment data from the Texas Education Agency (TEA).
+Texas has the second-largest public school system in America -- **5.5
+million students** across 1,200+ districts. `txschooldata` gives you
+one-line access to enrollment, demographics, graduation rates, and STAAR
+assessment data directly from the Texas Education Agency (TEA), covering
+1997 through 2025. No manual downloads, no scraping, no file
+wrangling.
+
+This package is part of the
+[njschooldata](https://github.com/almartin82/njschooldata) family --
+a set of R and Python packages providing consistent access to
+state-published school data for all 50 states.
 
 **Documentation: <https://almartin82.github.io/txschooldata/>**
 
-## Installation
+## R Quickstart
 
 ``` r
 # install.packages("remotes")
 remotes::install_github("almartin82/txschooldata")
 ```
-
-## Quick Start
-
-### Enrollment Data
 
 ``` r
 library(txschooldata)
@@ -57,6 +62,23 @@ staar |>
 #> 1   HOUSTON ISD     10846             3488           7358      4716        3623
 ```
 
+## Python Quickstart
+
+``` bash
+pip install pytxschooldata
+```
+
+``` python
+from pytxschooldata import fetch_enr
+
+enr = fetch_enr(2024)
+print(enr.head())
+```
+
+The Python package wraps the R package via `rpy2` and returns pandas
+DataFrames. It exposes `fetch_enr()`, `fetch_enr_multi()`, `tidy_enr()`,
+and `get_available_years()`.
+
 ## What can you find with txschooldata?
 
 Texas public schools enroll **5.5 million students** across 1,200+
@@ -70,14 +92,16 @@ library(ggplot2)
 library(scales)
 
 # Grab 5 years of enrollment data
-enr <- fetch_enr_multi(2020:2024)
+enr <- fetch_enr_multi(2020:2024, use_cache = TRUE)
 ```
 
-Here are ten narratives hiding in the numbers.
+Here are fifteen narratives hiding in the numbers.
 
 ------------------------------------------------------------------------
 
 ### 1. COVID erased a decade of growth in one year
+
+The pandemic caused the largest single-year enrollment drop in Texas history. Between 2020 and 2021, Texas public schools lost **120,133 students** -- equivalent to the entire enrollment of El Paso ISD.
 
 ``` r
 enr %>%
@@ -96,12 +120,16 @@ enr %>%
 #> 5     2024    5517464   13314       0.24
 ```
 
-**-120,133 students** vanished between 2020 and 2021—equivalent to the
+**-120,133 students** vanished between 2020 and 2021 -- equivalent to the
 entire enrollment of El Paso ISD.
+
+![COVID enrollment drop](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/covid-plot-1.png)
 
 ------------------------------------------------------------------------
 
 ### 2. One in four students is now an English learner
+
+The proportion of LEP students grew by 4.1 percentage points in five years -- from 20.3% to 24.4%. This is the single largest demographic shift in the data.
 
 ``` r
 lep_trend <- enr %>%
@@ -133,19 +161,16 @@ ggplot(lep_trend, aes(x = end_year, y = pct * 100)) +
   theme_minimal()
 ```
 
-<figure>
-<img
-src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/lep-plot-1.png"
-alt="LEP trend" />
-<figcaption aria-hidden="true">LEP trend</figcaption>
-</figure>
+![LEP trend](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/lep-plot-1.png)
 
 From 20.3% to **24.4%** in five years. Schools need more ESL teachers
 than ever.
 
 ------------------------------------------------------------------------
 
-### 3. Coppell ISD is Texas’s first Asian-majority district
+### 3. Coppell ISD is Texas's first Asian-majority district
+
+In a striking demographic shift, Coppell ISD became Texas's first Asian-majority public school district, with **56.7%** of students identifying as Asian in 2024.
 
 ``` r
 enr %>%
@@ -180,6 +205,8 @@ years.
 ------------------------------------------------------------------------
 
 ### 4. Fort Worth ISD lost 14% of its students
+
+While statewide enrollment recovered after COVID, urban districts continue to lose students. Fort Worth ISD lost **11,801 students** (-14.3%), making it the fastest-declining large district in Texas.
 
 ``` r
 d2020 <- enr %>%
@@ -221,6 +248,10 @@ Urban districts are bleeding students to suburbs and charters.
 
 ### 5. IDEA Public Schools grew 24% in three years
 
+IDEA Public Schools, a charter network operating across Texas, grew from
+62,158 to 76,819 students between 2021 and 2024 -- a gain of **14,661
+students** (+23.6%).
+
 ``` r
 enr %>%
   filter(district_name == "IDEA PUBLIC SCHOOLS", is_district,
@@ -241,6 +272,10 @@ education.
 
 ### 6. Fort Bend ISD has no racial majority
 
+Fort Bend ISD is one of the most diverse school districts in America. No
+racial group exceeds 28% of enrollment -- White (13.2%), Black (27.8%),
+Hispanic (26.7%), and Asian (27.6%) students are nearly equally represented.
+
 ``` r
 enr %>%
   filter(district_name == "FORT BEND ISD", is_district, grade_level == "TOTAL",
@@ -248,7 +283,7 @@ enr %>%
   select(end_year, subgroup, pct) %>%
   mutate(pct = round(pct * 100, 1)) %>%
   pivot_wider(names_from = subgroup, values_from = pct)
-#> # A tibble: 4 × 5
+#> # A tibble: 4 x 5
 #>   end_year white black hispanic asian
 #>      <int> <dbl> <dbl>    <dbl> <dbl>
 #> 1     2021  14.8  27.5     26.4  27.3
@@ -257,12 +292,16 @@ enr %>%
 #> 4     2024  13.2  27.8     26.7  27.6
 ```
 
+![Fort Bend diversity](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/diversity-chart-1.png)
+
 No group exceeds 28%. One of the most diverse large districts in
 America.
 
 ------------------------------------------------------------------------
 
 ### 7. Kindergarten enrollment dropped 5.8%
+
+Kindergarten enrollment fell from 383,585 to 361,329 -- a drop of 22,256 students (-5.8%). This could signal declining birth rates, rising private school enrollment, or families delaying school entry.
 
 ``` r
 enr %>%
@@ -274,7 +313,7 @@ enr %>%
     change = `2024` - `2020`,
     pct_change = round(change / `2020` * 100, 1)
   )
-#> # A tibble: 6 × 8
+#> # A tibble: 6 x 8
 #>   grade_level `2020` `2021` `2022` `2023` `2024` change pct_change
 #>   <chr>        <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>      <dbl>
 #> 1 PK          248413 196560 222767 243493 247979   -434       -0.2
@@ -290,6 +329,8 @@ enr %>%
 ------------------------------------------------------------------------
 
 ### 8. 62% of students are economically disadvantaged
+
+The share of economically disadvantaged students grew from 60.3% to 62.3% -- nearly two-thirds of all students in Texas public schools.
 
 ``` r
 econ_trend <- enr %>%
@@ -320,18 +361,15 @@ ggplot(econ_trend, aes(x = end_year, y = pct)) +
   theme_minimal()
 ```
 
-<figure>
-<img
-src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/econ-plot-1.png"
-alt="Econ disadvantaged trend" />
-<figcaption aria-hidden="true">Econ disadvantaged trend</figcaption>
-</figure>
+![Econ disadvantaged trend](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/econ-plot-1.png)
 
 Up from 60.3%. Nearly two-thirds of Texas students qualify.
 
 ------------------------------------------------------------------------
 
 ### 9. White students dropped below 25%
+
+White enrollment declined from 27.0% to 25.0% of total enrollment -- a 2 percentage point drop in just five years. Meanwhile, Hispanic (53.2%) and Asian (5.4%) shares continue to grow.
 
 ``` r
 enr %>%
@@ -340,13 +378,13 @@ enr %>%
   select(end_year, subgroup, pct) %>%
   mutate(pct = round(pct * 100, 1)) %>%
   pivot_wider(names_from = subgroup, values_from = pct)
-#> # A tibble: 5 × 6
+#> # A tibble: 5 x 6
 #>   end_year white black hispanic asian multiracial
 #>      <int> <dbl> <dbl>    <dbl> <dbl>       <dbl>
 #> 1     2020  27    12.6     52.8   4.6         2.5
 #> 2     2021  26.5  12.7     52.9   4.7         2.7
 #> 3     2022  26.3  12.8     52.8   4.8         2.9
-#> 4     2023  25.6  12.8     53     5.1         3  
+#> 4     2023  25.6  12.8     53     5.1         3
 #> 5     2024  25    12.8     53.2   5.4         3.1
 ```
 
@@ -372,18 +410,15 @@ enr %>%
   theme(legend.position = "bottom")
 ```
 
-<figure>
-<img
-src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/demo-plot-1.png"
-alt="Demographics over time" />
-<figcaption aria-hidden="true">Demographics over time</figcaption>
-</figure>
+![Demographics over time](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/demo-plot-1.png)
 
 Hispanic students are now **53.2%** of enrollment.
 
 ------------------------------------------------------------------------
 
 ### 10. 439 districts now have Hispanic majorities
+
+The number of districts where Hispanic students are the majority grew from 419 in 2020 to **439 in 2024** -- now 36% of all Texas districts.
 
 ``` r
 enr %>%
@@ -396,7 +431,7 @@ enr %>%
     pct_majority = round(hispanic_majority / total_districts * 100, 1),
     .groups = "drop"
   )
-#> # A tibble: 5 × 4
+#> # A tibble: 5 x 4
 #>   end_year total_districts hispanic_majority pct_majority
 #>      <int>           <int>             <int>        <dbl>
 #> 1     2020            1202               419         34.9
@@ -407,6 +442,202 @@ enr %>%
 ```
 
 Up from 419 in 2020. Now **36%** of all Texas school districts.
+
+------------------------------------------------------------------------
+
+### 11. Houston ISD vs Dallas ISD: two giants, two trajectories
+
+Houston ISD and Dallas ISD are the two largest traditional districts in Texas. Both lost students since 2020, but Houston's losses are nearly double Dallas's in absolute terms.
+
+``` r
+big_two <- enr %>%
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
+         district_name %in% c("HOUSTON ISD", "DALLAS ISD")) %>%
+  select(end_year, district_name, n_students) %>%
+  pivot_wider(names_from = district_name, values_from = n_students) %>%
+  mutate(
+    houston_change = `HOUSTON ISD` - lag(`HOUSTON ISD`),
+    dallas_change = `DALLAS ISD` - lag(`DALLAS ISD`)
+  )
+
+print(big_two)
+#> [output will be generated when vignette renders]
+```
+
+``` r
+enr %>%
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
+         district_name %in% c("HOUSTON ISD", "DALLAS ISD")) %>%
+  ggplot(aes(x = end_year, y = n_students, color = district_name)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  scale_y_continuous(labels = comma) +
+  scale_color_manual(values = c("DALLAS ISD" = "#0072B2", "HOUSTON ISD" = "#CC0000")) +
+  labs(
+    title = "Houston ISD vs Dallas ISD Enrollment",
+    subtitle = "Both declining, but Houston falling faster",
+    x = "School Year (End)", y = "Total Students", color = NULL
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+![Houston vs Dallas](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/houston-vs-dallas-plot-1.png)
+
+Houston lost **25,706 students** vs Dallas's **11,527**. Both are losing
+ground to suburban and charter competitors.
+
+------------------------------------------------------------------------
+
+### 12. Special education identification rose to 12%
+
+The share of students receiving special education services has climbed steadily, reaching roughly **12%** of total enrollment by 2024. That means approximately 1 in 8 Texas students now receives special education services.
+
+``` r
+sped_trend <- enr %>%
+  filter(is_state, subgroup == "special_ed", grade_level == "TOTAL") %>%
+  select(end_year, n_students, pct) %>%
+  mutate(pct_display = round(pct * 100, 1))
+
+sped_trend %>% select(end_year, n_students, pct_display)
+#> [output will be generated when vignette renders]
+```
+
+``` r
+ggplot(sped_trend, aes(x = end_year, y = pct * 100)) +
+  geom_line(linewidth = 1.2, color = "#009E73") +
+  geom_point(size = 3, color = "#009E73") +
+  geom_text(aes(label = paste0(round(pct * 100, 1), "%")), vjust = -0.8, size = 3.5) +
+  scale_y_continuous(limits = c(9, 14)) +
+  labs(
+    title = "Special Education Growth",
+    subtitle = "Students receiving special ed services as % of total",
+    x = "School Year (End)", y = "Percent"
+  ) +
+  theme_minimal()
+```
+
+![Special ed growth](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/sped-plot-1.png)
+
+The increase likely reflects better identification, expanded definitions,
+and growing awareness of learning differences.
+
+------------------------------------------------------------------------
+
+### 13. Frisco ISD added 20,000 students in five years
+
+Frisco ISD is one of the fastest-growing large districts in the state,
+adding **20,259 students** between 2020 and 2024 -- a 44% increase. The
+suburban Collin County district shows no signs of slowing down.
+
+``` r
+frisco_trend <- enr %>%
+  filter(district_name == "FRISCO ISD", is_district,
+         subgroup == "total_enrollment", grade_level == "TOTAL") %>%
+  select(end_year, n_students) %>%
+  arrange(end_year) %>%
+  mutate(
+    change = n_students - lag(n_students),
+    pct_change = round(change / lag(n_students) * 100, 1)
+  )
+
+print(frisco_trend)
+#> [output will be generated when vignette renders]
+```
+
+``` r
+ggplot(frisco_trend, aes(x = end_year, y = n_students)) +
+  geom_col(fill = "#56B4E9", width = 0.6) +
+  geom_text(aes(label = comma(n_students)), vjust = -0.3, size = 3.5) +
+  scale_y_continuous(labels = comma, limits = c(0, 75000)) +
+  labs(
+    title = "Frisco ISD Enrollment Surge",
+    subtitle = "One of the fastest-growing large districts in Texas",
+    x = "School Year (End)", y = "Total Students"
+  ) +
+  theme_minimal()
+```
+
+![Frisco ISD growth](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/frisco-growth-plot-1.png)
+
+While urban cores lose students, suburban boomtowns like Frisco absorb the
+growth.
+
+------------------------------------------------------------------------
+
+### 14. Pre-K enrollment still hasn't recovered from COVID
+
+Pre-K enrollment cratered by **21%** during COVID (from 248,413 to 196,560). By 2024 it has clawed back to 247,979 -- still **434 students short** of pre-pandemic levels.
+
+``` r
+pk_trend <- enr %>%
+  filter(is_state, subgroup == "total_enrollment", grade_level == "PK") %>%
+  select(end_year, n_students) %>%
+  arrange(end_year) %>%
+  mutate(
+    change = n_students - lag(n_students),
+    pct_change = round(change / lag(n_students) * 100, 1),
+    vs_2020 = n_students - first(n_students)
+  )
+
+print(pk_trend)
+#> [output will be generated when vignette renders]
+```
+
+``` r
+ggplot(pk_trend, aes(x = end_year, y = n_students)) +
+  geom_line(linewidth = 1.2, color = "#D55E00") +
+  geom_point(size = 3, color = "#D55E00") +
+  geom_hline(yintercept = 248413, linetype = "dashed", color = "gray50") +
+  annotate("text", x = 2022, y = 251000, label = "2020 level", color = "gray40", size = 3.5) +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Pre-K Enrollment: The Slowest Recovery",
+    subtitle = "Still below 2020 levels after four years",
+    x = "School Year (End)", y = "Pre-K Students"
+  ) +
+  theme_minimal()
+```
+
+![Pre-K recovery](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/pk-recovery-plot-1.png)
+
+The slow Pre-K recovery matters because early childhood education is one
+of the highest-return investments in education.
+
+------------------------------------------------------------------------
+
+### 15. Multiracial students are the fastest-growing demographic
+
+Students identifying as Two or More Races grew from 2.5% to 3.1% of enrollment between 2020 and 2024 -- a 24% increase in raw numbers. While still a small share, this is the fastest percentage growth of any demographic group.
+
+``` r
+multi_trend <- enr %>%
+  filter(is_state, subgroup == "multiracial", grade_level == "TOTAL") %>%
+  select(end_year, n_students, pct) %>%
+  mutate(pct_display = round(pct * 100, 1))
+
+multi_trend %>% select(end_year, n_students, pct_display)
+#> [output will be generated when vignette renders]
+```
+
+``` r
+ggplot(multi_trend, aes(x = end_year, y = n_students)) +
+  geom_line(linewidth = 1.2, color = "#882255") +
+  geom_point(size = 3, color = "#882255") +
+  geom_text(aes(label = comma(n_students)), vjust = -0.8, size = 3.5) +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Multiracial Students: Fastest-Growing Group",
+    subtitle = "Two or More Races enrollment, 2020-2024",
+    x = "School Year (End)", y = "Students"
+  ) +
+  theme_minimal()
+```
+
+![Multiracial growth](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/multiracial-plot-1.png)
+
+This trend mirrors national patterns and reflects both demographic change
+and evolving identity choices.
 
 ------------------------------------------------------------------------
 
@@ -457,7 +688,15 @@ at-risk).
 - **[Function
   reference](https://almartin82.github.io/txschooldata/reference/)**
 
-## Data availability
+## Data Notes
+
+### Data source
+
+All data is fetched directly from the **Texas Education Agency (TEA)**
+servers at <https://rptsvr1.tea.texas.gov/>. No manual downloads
+required.
+
+### Available years
 
 This package pulls from three TEA reporting systems:
 
@@ -467,30 +706,53 @@ This package pulls from three TEA reporting systems:
 | **AEIS SAS** | 2003-2012 | Academic Excellence Indicator System |
 | **TAPR**     | 2013-2025 | Texas Academic Performance Reports   |
 
-All data is fetched directly from TEA servers—no manual downloads
-required.
+### Suppression rules
 
-### What’s included
+TEA suppresses enrollment counts when a subgroup has fewer than 5
+students at a campus to protect student privacy. Suppressed values
+appear as `NA` in the data.
 
-**Enrollment data:** - **Levels:** State, district (~1,200), and campus
-(~9,000) - **Demographics:** White, Black, Hispanic, Asian, American
-Indian, Pacific Islander, Two or More Races - **Special populations:**
-Economically disadvantaged, LEP/English learners, Special education,
-At-risk, Gifted - **Grade levels:** Early Education (EE) through Grade
-12, plus totals
+### Known data quality issues
 
-**Graduation rate data:** - **Years:** Class of 2003-2024 (four-year
-longitudinal rates) - **Levels:** State, district, campus -
-**Subgroups:** All students, race/ethnicity, gender, special
-populations - **Note:** Uses federal calculation for consistency across
-years
+- **Asian/Pacific Islander:** Pre-2011 data combines Asian and Pacific
+  Islander into a single "asian" category. Separate Pacific Islander
+  data only available from 2011 onward (federal reporting change).
+- **Two or More Races:** Only available from 2011 onward (federal
+  reporting change).
+- **Historical comparisons:** Definition of "economically disadvantaged"
+  and other categories may shift over time.
+- **STAAR performance levels:** TEA's performance level counts may not
+  sum to the total tested count. Students may be counted in multiple
+  categories depending on reporting methodology.
 
-**STAAR assessment data:** - **Years:** 2018, 2021-2023 (legacy
-format) - **Levels:** District (~1,200) and campus (~9,000) -
-**Grades:** 3-8 - **Subjects:** Reading/Language Arts (RLA) and Math -
-**Performance levels:** Did Not Meet, Approaches, Meets, Masters Grade
-Level - **Note:** 2019-2020 not available (COVID-19 pandemic disrupted
-testing)
+### Census Day
+
+TEA enrollment data is based on the **PEIMS Fall Snapshot**, typically
+taken on the last Friday in October each year.
+
+### What's included
+
+**Enrollment data:**
+- **Levels:** State, district (~1,200), and campus (~9,000)
+- **Demographics:** White, Black, Hispanic, Asian, American Indian,
+  Pacific Islander, Two or More Races
+- **Special populations:** Economically disadvantaged, LEP/English
+  learners, Special education, At-risk, Gifted
+- **Grade levels:** Early Education (EE) through Grade 12, plus totals
+
+**Graduation rate data:**
+- **Years:** Class of 2003-2024 (four-year longitudinal rates)
+- **Levels:** State, district, campus
+- **Subgroups:** All students, race/ethnicity, gender, special populations
+- **Note:** Uses federal calculation for consistency across years
+
+**STAAR assessment data:**
+- **Years:** 2018, 2021-2023 (legacy format)
+- **Levels:** District (~1,200) and campus (~9,000)
+- **Grades:** 3-8
+- **Subjects:** Reading/Language Arts (RLA) and Math
+- **Performance levels:** Did Not Meet, Approaches, Meets, Masters Grade Level
+- **Note:** 2019-2020 not available (COVID-19 pandemic disrupted testing)
 
 ### Formatting notes
 
@@ -504,22 +766,6 @@ testing)
   percentage. Multiply by 100 for display.
 - **Caching:** Data is cached locally after first download. Use
   `use_cache = FALSE` to force refresh.
-- **STAAR performance levels:** TEA’s performance level counts may not
-  sum to the total tested count. This is the TEA’s data structure
-  (students may be counted in multiple categories depending on reporting
-  methodology).
-
-### Caveats
-
-- **Asian/Pacific Islander:** Pre-2011 data combines Asian and Pacific
-  Islander into a single “asian” category. Separate Pacific Islander
-  data only available from 2011 onward (federal reporting change).
-- **Two or More Races:** Only available from 2011 onward (federal
-  reporting change)
-- **Column names:** Standardized across years, but underlying TEA
-  variable names differ between systems
-- **Historical comparisons:** Definition of “economically disadvantaged”
-  and other categories may shift over time
 
 ## Part of the State Schooldata Project
 
