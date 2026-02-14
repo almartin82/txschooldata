@@ -1,8 +1,8 @@
 ---
-title: "10 Things You Didn't Know About Texas Schools"
+title: "15 Things You Didn't Know About Texas Schools"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{10 Things You Didn't Know About Texas Schools}
+  %\VignetteIndexEntry{15 Things You Didn't Know About Texas Schools}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -371,9 +371,183 @@ print(hisp_majority)
 
 ---
 
+## 11. Houston ISD vs Dallas ISD: Two Giants, Two Trajectories
+
+Houston ISD and Dallas ISD are the two largest traditional districts in Texas. Both lost students since 2020, but Houston's losses are nearly double Dallas's in absolute terms.
+
+```{r houston-vs-dallas}
+big_two <- enr %>%
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
+         district_name %in% c("HOUSTON ISD", "DALLAS ISD")) %>%
+  select(end_year, district_name, n_students) %>%
+  pivot_wider(names_from = district_name, values_from = n_students) %>%
+  mutate(
+    houston_change = `HOUSTON ISD` - lag(`HOUSTON ISD`),
+    dallas_change = `DALLAS ISD` - lag(`DALLAS ISD`)
+  )
+
+print(big_two)
+```
+
+```{r houston-vs-dallas-plot}
+enr %>%
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
+         district_name %in% c("HOUSTON ISD", "DALLAS ISD")) %>%
+  ggplot(aes(x = end_year, y = n_students, color = district_name)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  scale_y_continuous(labels = comma) +
+  scale_color_manual(values = c("DALLAS ISD" = "#0072B2", "HOUSTON ISD" = "#CC0000")) +
+  labs(
+    title = "Houston ISD vs Dallas ISD Enrollment",
+    subtitle = "Both declining, but Houston falling faster",
+    x = "School Year (End)", y = "Total Students", color = NULL
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+Houston lost **25,706 students** vs Dallas's **11,527**. Both are losing ground to suburban and charter competitors.
+
+---
+
+## 12. Special Education Identification Rose to 12%
+
+The share of students receiving special education services has climbed steadily, reaching **12%** of total enrollment by 2024. That means roughly 1 in 8 Texas students now receives special education services.
+
+```{r sped-growth}
+sped_trend <- enr %>%
+  filter(is_state, subgroup == "special_ed", grade_level == "TOTAL") %>%
+  select(end_year, n_students, pct) %>%
+  mutate(pct_display = round(pct * 100, 1))
+
+print(sped_trend %>% select(end_year, n_students, pct_display))
+```
+
+```{r sped-plot}
+ggplot(sped_trend, aes(x = end_year, y = pct * 100)) +
+  geom_line(linewidth = 1.2, color = "#009E73") +
+  geom_point(size = 3, color = "#009E73") +
+  geom_text(aes(label = paste0(round(pct * 100, 1), "%")), vjust = -0.8, size = 3.5) +
+  scale_y_continuous(limits = c(9, 14)) +
+  labs(
+    title = "Special Education Growth",
+    subtitle = "Students receiving special ed services as % of total",
+    x = "School Year (End)", y = "Percent"
+  ) +
+  theme_minimal()
+```
+
+The increase likely reflects better identification, expanded definitions, and growing awareness of learning differences.
+
+---
+
+## 13. Frisco ISD Added 20,000 Students in Five Years
+
+**Frisco ISD** is one of the fastest-growing large districts in the state, adding **20,259 students** between 2020 and 2024 -- a 44% increase. The suburban Collin County district shows no signs of slowing down.
+
+```{r frisco-growth}
+frisco_trend <- enr %>%
+  filter(district_name == "FRISCO ISD", is_district,
+         subgroup == "total_enrollment", grade_level == "TOTAL") %>%
+  select(end_year, n_students) %>%
+  arrange(end_year) %>%
+  mutate(
+    change = n_students - lag(n_students),
+    pct_change = round(change / lag(n_students) * 100, 1)
+  )
+
+print(frisco_trend)
+```
+
+```{r frisco-growth-plot}
+ggplot(frisco_trend, aes(x = end_year, y = n_students)) +
+  geom_col(fill = "#56B4E9", width = 0.6) +
+  geom_text(aes(label = comma(n_students)), vjust = -0.3, size = 3.5) +
+  scale_y_continuous(labels = comma, limits = c(0, 75000)) +
+  labs(
+    title = "Frisco ISD Enrollment Surge",
+    subtitle = "One of the fastest-growing large districts in Texas",
+    x = "School Year (End)", y = "Total Students"
+  ) +
+  theme_minimal()
+```
+
+While urban cores lose students, suburban boomtowns like Frisco absorb the growth.
+
+---
+
+## 14. Pre-K Enrollment Still Hasn't Recovered from COVID
+
+Pre-K enrollment cratered by **21%** during COVID (from 248,413 to 196,560). By 2024 it has clawed back to 247,979 -- still **434 students short** of pre-pandemic levels.
+
+```{r pk-recovery}
+pk_trend <- enr %>%
+  filter(is_state, subgroup == "total_enrollment", grade_level == "PK") %>%
+  select(end_year, n_students) %>%
+  arrange(end_year) %>%
+  mutate(
+    change = n_students - lag(n_students),
+    pct_change = round(change / lag(n_students) * 100, 1),
+    vs_2020 = n_students - first(n_students)
+  )
+
+print(pk_trend)
+```
+
+```{r pk-recovery-plot}
+ggplot(pk_trend, aes(x = end_year, y = n_students)) +
+  geom_line(linewidth = 1.2, color = "#D55E00") +
+  geom_point(size = 3, color = "#D55E00") +
+  geom_hline(yintercept = 248413, linetype = "dashed", color = "gray50") +
+  annotate("text", x = 2022, y = 251000, label = "2020 level", color = "gray40", size = 3.5) +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Pre-K Enrollment: The Slowest Recovery",
+    subtitle = "Still below 2020 levels after four years",
+    x = "School Year (End)", y = "Pre-K Students"
+  ) +
+  theme_minimal()
+```
+
+The slow Pre-K recovery matters because early childhood education is one of the highest-return investments in education.
+
+---
+
+## 15. Multiracial Students Are the Fastest-Growing Demographic
+
+Students identifying as **Two or More Races** grew from 2.5% to 3.1% of enrollment between 2020 and 2024 -- a 24% increase in raw numbers. While still a small share, this is the fastest percentage growth of any demographic group.
+
+```{r multiracial-growth}
+multi_trend <- enr %>%
+  filter(is_state, subgroup == "multiracial", grade_level == "TOTAL") %>%
+  select(end_year, n_students, pct) %>%
+  mutate(pct_display = round(pct * 100, 1))
+
+print(multi_trend %>% select(end_year, n_students, pct_display))
+```
+
+```{r multiracial-plot}
+ggplot(multi_trend, aes(x = end_year, y = n_students)) +
+  geom_line(linewidth = 1.2, color = "#882255") +
+  geom_point(size = 3, color = "#882255") +
+  geom_text(aes(label = comma(n_students)), vjust = -0.8, size = 3.5) +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Multiracial Students: Fastest-Growing Group",
+    subtitle = "Two or More Races enrollment, 2020-2024",
+    x = "School Year (End)", y = "Students"
+  ) +
+  theme_minimal()
+```
+
+This trend mirrors national patterns and reflects both demographic change and evolving identity choices.
+
+---
+
 ## Summary
 
-These ten findings illustrate the rapid transformation of Texas public education:
+These fifteen findings illustrate the rapid transformation of Texas public education:
 
 | Finding | Change (2020-2024) |
 |---------|-------------------|
@@ -387,6 +561,11 @@ These ten findings illustrate the rapid transformation of Texas public education
 | Economically disadvantaged | 60.3% to 62.3% |
 | White enrollment | 27.0% to 25.0% |
 | Hispanic majority districts | 419 to 439 (+20) |
+| Houston vs Dallas ISD | -25,706 vs -11,527 students |
+| Special education | Rose to ~12% of enrollment |
+| Frisco ISD | +20,259 students (+44%) |
+| Pre-K enrollment | Still below 2020 levels |
+| Multiracial students | Fastest-growing group (+24%) |
 
 The data tells a story of suburbanization, rising poverty, linguistic diversity, and demographic transformation that will shape Texas education for decades to come.
 
