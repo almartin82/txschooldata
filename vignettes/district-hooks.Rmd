@@ -36,7 +36,7 @@ Texas public schools enroll over 5.5 million students across 1,200+ districts, m
 
 ```{r fetch-data, cache=TRUE}
 # Fetch 5 years of enrollment data
-enr <- fetch_enr_multi(2020:2024, use_eval = FALSE)
+enr <- fetch_enr_multi(2020:2024, use_cache = TRUE)
 ```
 
 ---
@@ -586,7 +586,7 @@ library(txschooldata)
 library(dplyr)
 
 # Fetch 2024 data
-enr <- fetch_enr(2024, use_eval = FALSE)
+enr <- fetch_enr(2024, use_cache = TRUE)
 
 # Your district's demographics
 enr %>%
