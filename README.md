@@ -219,12 +219,16 @@ d2024 <- enr %>%
          grade_level == "TOTAL", end_year == 2024) %>%
   select(district_id, district_name, n_2024 = n_students)
 
-d2020 %>%
+losses <- d2020 %>%
   inner_join(d2024, by = "district_id") %>%
   mutate(
     change = n_2024 - n_2020,
     pct_change = round((change / n_2020) * 100, 1)
-  ) %>%
+  )
+
+stopifnot(nrow(losses) > 0)
+# Largest percentage losses among big districts
+losses %>%
   filter(n_2020 >= 10000) %>%
   arrange(pct_change) %>%
   select(district_name, n_2020, n_2024, change, pct_change) %>%
@@ -389,11 +393,13 @@ enr %>%
 ```
 
 ``` r
-enr %>%
+demo_chart_data <- enr %>%
   filter(is_state, grade_level == "TOTAL",
          subgroup %in% c("white", "black", "hispanic", "asian")) %>%
-  mutate(pct = pct * 100) %>%
-  ggplot(aes(x = end_year, y = pct, color = subgroup)) +
+  mutate(pct = pct * 100)
+
+stopifnot(nrow(demo_chart_data) > 0)
+ggplot(demo_chart_data, aes(x = end_year, y = pct, color = subgroup)) +
   geom_line(linewidth = 1.2) +
   geom_point(size = 2) +
   scale_color_manual(
@@ -460,15 +466,24 @@ big_two <- enr %>%
     dallas_change = `DALLAS ISD` - lag(`DALLAS ISD`)
   )
 
+stopifnot(nrow(big_two) > 0)
 print(big_two)
-#> [output will be generated when vignette renders]
+#> # A tibble: 4 x 5
+#>   end_year `DALLAS ISD` `HOUSTON ISD` houston_change dallas_change
+#>      <int>        <dbl>         <dbl>          <dbl>         <dbl>
+#> 1     2021       145105        196550             NA            NA
+#> 2     2022       143430        193727          -2823         -1675
+#> 3     2023       141042        189290          -4437         -2388
+#> 4     2024       139096        183603          -5687         -1946
 ```
 
 ``` r
-enr %>%
+hd_chart_data <- enr %>%
   filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
-         district_name %in% c("HOUSTON ISD", "DALLAS ISD")) %>%
-  ggplot(aes(x = end_year, y = n_students, color = district_name)) +
+         district_name %in% c("HOUSTON ISD", "DALLAS ISD"))
+
+stopifnot(nrow(hd_chart_data) > 0)
+ggplot(hd_chart_data, aes(x = end_year, y = n_students, color = district_name)) +
   geom_line(linewidth = 1.2) +
   geom_point(size = 3) +
   scale_y_continuous(labels = comma) +
@@ -484,14 +499,14 @@ enr %>%
 
 ![Houston vs Dallas](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/houston-vs-dallas-plot-1.png)
 
-Houston lost **25,706 students** vs Dallas's **11,527**. Both are losing
-ground to suburban and charter competitors.
+Between 2021 and 2024, Houston lost **12,947 students** while Dallas lost
+**6,009**. Both are losing ground to suburban and charter competitors.
 
 ------------------------------------------------------------------------
 
-### 12. Special education identification rose to 12%
+### 12. Nearly 1 in 7 Texas students now receives special education
 
-The share of students receiving special education services has climbed steadily, reaching roughly **12%** of total enrollment by 2024. That means approximately 1 in 8 Texas students now receives special education services.
+In 2024, **13.9%** of Texas public school students -- 764,858 children -- receive special education services. This is a dramatic reversal from 2016, when a federal investigation revealed Texas had used an unofficial **8.5% cap** on special education identification for nearly two decades, denying services to tens of thousands of eligible students.
 
 ``` r
 sped_trend <- enr %>%
@@ -499,40 +514,25 @@ sped_trend <- enr %>%
   select(end_year, n_students, pct) %>%
   mutate(pct_display = round(pct * 100, 1))
 
-sped_trend %>% select(end_year, n_students, pct_display)
-#> [output will be generated when vignette renders]
+stopifnot(nrow(sped_trend) > 0)
+print(sped_trend %>% select(end_year, n_students, pct_display))
+#>   end_year n_students pct_display
+#> 1     2024     764858        13.9
 ```
 
-``` r
-ggplot(sped_trend, aes(x = end_year, y = pct * 100)) +
-  geom_line(linewidth = 1.2, color = "#009E73") +
-  geom_point(size = 3, color = "#009E73") +
-  geom_text(aes(label = paste0(round(pct * 100, 1), "%")), vjust = -0.8, size = 3.5) +
-  scale_y_continuous(limits = c(9, 14)) +
-  labs(
-    title = "Special Education Growth",
-    subtitle = "Students receiving special ed services as % of total",
-    x = "School Year (End)", y = "Percent"
-  ) +
-  theme_minimal()
-```
-
-![Special ed growth](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/sped-plot-1.png)
-
-The increase likely reflects better identification, expanded definitions,
-and growing awareness of learning differences.
+At 13.9%, Texas now exceeds the national average of ~13% for special
+education identification -- a remarkable turnaround from the years when it
+ranked dead last among states.
 
 ------------------------------------------------------------------------
 
-### 13. Frisco ISD added 20,000 students in five years
+### 13. Prosper ISD nearly doubled in five years
 
-Frisco ISD is one of the fastest-growing large districts in the state,
-adding **20,259 students** between 2020 and 2024 -- a 44% increase. The
-suburban Collin County district shows no signs of slowing down.
+**Prosper ISD** grew from 16,789 to 28,394 students between 2020 and 2024 -- adding **11,605 students** for a staggering **69% increase**. The Collin/Denton County district grew at roughly 14% per year, every year, without a single year of decline.
 
 ``` r
-frisco_trend <- enr %>%
-  filter(district_name == "FRISCO ISD", is_district,
+prosper_trend <- enr %>%
+  filter(district_id == "043912", is_district,
          subgroup == "total_enrollment", grade_level == "TOTAL") %>%
   select(end_year, n_students) %>%
   arrange(end_year) %>%
@@ -541,26 +541,32 @@ frisco_trend <- enr %>%
     pct_change = round(change / lag(n_students) * 100, 1)
   )
 
-print(frisco_trend)
-#> [output will be generated when vignette renders]
+stopifnot(nrow(prosper_trend) > 0)
+print(prosper_trend)
+#>   end_year n_students change pct_change
+#> 1     2020      16789     NA         NA
+#> 2     2021      19063   2274       13.5
+#> 3     2022      21700   2637       13.8
+#> 4     2023      24897   3197       14.7
+#> 5     2024      28394   3497       14.0
 ```
 
 ``` r
-ggplot(frisco_trend, aes(x = end_year, y = n_students)) +
+ggplot(prosper_trend, aes(x = end_year, y = n_students)) +
   geom_col(fill = "#56B4E9", width = 0.6) +
   geom_text(aes(label = comma(n_students)), vjust = -0.3, size = 3.5) +
-  scale_y_continuous(labels = comma, limits = c(0, 75000)) +
+  scale_y_continuous(labels = comma, limits = c(0, 35000)) +
   labs(
-    title = "Frisco ISD Enrollment Surge",
-    subtitle = "One of the fastest-growing large districts in Texas",
+    title = "Prosper ISD: 69% Growth in Five Years",
+    subtitle = "The fastest-growing large district in Texas",
     x = "School Year (End)", y = "Total Students"
   ) +
   theme_minimal()
 ```
 
-![Frisco ISD growth](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/frisco-growth-plot-1.png)
+![Prosper ISD growth](https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/prosper-growth-plot-1.png)
 
-While urban cores lose students, suburban boomtowns like Frisco absorb the
+While urban cores lose students, suburban boomtowns like Prosper absorb the
 growth.
 
 ------------------------------------------------------------------------
@@ -580,8 +586,14 @@ pk_trend <- enr %>%
     vs_2020 = n_students - first(n_students)
   )
 
+stopifnot(nrow(pk_trend) > 0)
 print(pk_trend)
-#> [output will be generated when vignette renders]
+#>   end_year n_students change pct_change vs_2020
+#> 1     2020     248413     NA         NA       0
+#> 2     2021     196560 -51853      -20.9  -51853
+#> 3     2022     222767  26207       13.3  -25646
+#> 4     2023     243493  20726        9.3   -4920
+#> 5     2024     247979   4486        1.8    -434
 ```
 
 ``` r
@@ -608,7 +620,7 @@ of the highest-return investments in education.
 
 ### 15. Multiracial students are the fastest-growing demographic
 
-Students identifying as Two or More Races grew from 2.5% to 3.1% of enrollment between 2020 and 2024 -- a 24% increase in raw numbers. While still a small share, this is the fastest percentage growth of any demographic group.
+Students identifying as Two or More Races grew from 2.5% to 3.1% of enrollment between 2020 and 2024 -- a 25% increase in raw numbers. While still a small share, this is the fastest percentage growth of any demographic group.
 
 ``` r
 multi_trend <- enr %>%
@@ -616,8 +628,14 @@ multi_trend <- enr %>%
   select(end_year, n_students, pct) %>%
   mutate(pct_display = round(pct * 100, 1))
 
-multi_trend %>% select(end_year, n_students, pct_display)
-#> [output will be generated when vignette renders]
+stopifnot(nrow(multi_trend) > 0)
+print(multi_trend %>% select(end_year, n_students, pct_display))
+#>   end_year n_students pct_display
+#> 1     2020     138434         2.5
+#> 2     2021     143368         2.7
+#> 3     2022     155887         2.9
+#> 4     2023     166128         3.0
+#> 5     2024     173425         3.1
 ```
 
 ``` r
