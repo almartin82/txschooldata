@@ -121,6 +121,25 @@
 <hr></div>
 </div>
 <div class="section level2">
+<h2 id="valid-filter-values-tidy-enrollment-via-fetch_enrtidy--true">Valid Filter Values (tidy enrollment via <code>fetch_enr(tidy = TRUE)</code>)<a class="anchor" aria-label="anchor" href="#valid-filter-values-tidy-enrollment-via-fetch_enrtidy--true"></a></h2>
+<div class="section level3">
+<h3 id="subgroup">subgroup<a class="anchor" aria-label="anchor" href="#subgroup"></a></h3>
+<p><code>total_enrollment</code>, <code>white</code>, <code>black</code>, <code>hispanic</code>, <code>asian</code>, <code>native_american</code>, <code>pacific_islander</code>, <code>multiracial</code>, <code>special_ed</code>, <code>lep</code>, <code>econ_disadv</code></p>
+<p><strong>NOT in tidy enrollment:</strong> No gender subgroups (<code>male</code>/<code>female</code>) in tidy enrollment. Texas TEA data provides demographic and special population breakdowns but gender is not included as a tidy subgroup.</p>
+</div>
+<div class="section level3">
+<h3 id="grade_level">grade_level<a class="anchor" aria-label="anchor" href="#grade_level"></a></h3>
+<p><code>EE</code>, <code>PK</code>, <code>K</code>, <code>01</code>-<code>12</code>, <code>TOTAL</code></p>
+<p>Grade aggregates from <code><a href="reference/enr_grade_aggs.html">enr_grade_aggs()</a></code>: <code>K8</code>, <code>HS</code>, <code>K12</code></p>
+<p><strong>Texas-specific:</strong> <code>EE</code> (Early Education) is a grade level unique to Texas TEA data. Raw TEA column names like <code>CPETGEEC</code>/<code>PETGEEC</code> are mapped to <code>EE</code>, <code>CPETGPKC</code>/<code>PETGPKC</code> to <code>PK</code>, <code>CPETGKNC</code>/<code>PETGKNC</code> to <code>K</code>, etc.</p>
+</div>
+<div class="section level3">
+<h3 id="entity-flags">entity flags<a class="anchor" aria-label="anchor" href="#entity-flags"></a></h3>
+<p><code>is_state</code>, <code>is_district</code>, <code>is_campus</code>, <code>is_charter</code></p>
+<p>Determined by the <code>type</code> column: <code>"State"</code>, <code>"District"</code>, <code>"Campus"</code>. Charter status via <code>charter_flag</code> column (<code>"Y"</code> = charter).</p>
+<hr></div>
+</div>
+<div class="section level2">
 <h2 id="pkgdown-configuration-critical">pkgdown Configuration (CRITICAL)<a class="anchor" aria-label="anchor" href="#pkgdown-configuration-critical"></a></h2>
 <p><strong>Always update <code>_pkgdown.yml</code> when adding exported functions, or CI will fail.</strong></p>
 <div class="section level3">

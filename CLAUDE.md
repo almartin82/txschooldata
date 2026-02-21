@@ -96,6 +96,40 @@ reference index
 
 ------------------------------------------------------------------------
 
+## Valid Filter Values (tidy enrollment via `fetch_enr(tidy = TRUE)`)
+
+### subgroup
+
+`total_enrollment`, `white`, `black`, `hispanic`, `asian`,
+`native_american`, `pacific_islander`, `multiracial`, `special_ed`,
+`lep`, `econ_disadv`
+
+**NOT in tidy enrollment:** No gender subgroups (`male`/`female`) in
+tidy enrollment. Texas TEA data provides demographic and special
+population breakdowns but gender is not included as a tidy subgroup.
+
+### grade_level
+
+`EE`, `PK`, `K`, `01`-`12`, `TOTAL`
+
+Grade aggregates from
+[`enr_grade_aggs()`](https://almartin82.github.io/txschooldata/reference/enr_grade_aggs.md):
+`K8`, `HS`, `K12`
+
+**Texas-specific:** `EE` (Early Education) is a grade level unique to
+Texas TEA data. Raw TEA column names like `CPETGEEC`/`PETGEEC` are
+mapped to `EE`, `CPETGPKC`/`PETGPKC` to `PK`, `CPETGKNC`/`PETGKNC` to
+`K`, etc.
+
+### entity flags
+
+`is_state`, `is_district`, `is_campus`, `is_charter`
+
+Determined by the `type` column: `"State"`, `"District"`, `"Campus"`.
+Charter status via `charter_flag` column (`"Y"` = charter).
+
+------------------------------------------------------------------------
+
 ## pkgdown Configuration (CRITICAL)
 
 **Always update `_pkgdown.yml` when adding exported functions, or CI
