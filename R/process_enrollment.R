@@ -60,6 +60,11 @@ process_enr <- function(raw_data, end_year) {
   # Process district data
   district_processed <- process_district_enr(raw_data$district, end_year)
 
+  # Backfill missing entity names from reference year
+  # TAPR data for 2013-2020 doesn't include DISTNAME/CAMPNAME in the download
+  district_processed <- backfill_district_names(district_processed)
+  campus_processed <- backfill_campus_names(campus_processed)
+
   # Create state aggregate
   state_processed <- create_state_aggregate(district_processed, end_year)
 
@@ -110,15 +115,19 @@ process_campus_enr <- function(df, end_year) {
     result$district_id <- clean_id(df[[district_col]])
   }
 
-  # Names
+  # Names - always create columns, even if NA (for backfill later)
   campus_name_col <- find_col(c("CAMPNAME", "CAMPUSNAME"))
   if (!is.null(campus_name_col)) {
     result$campus_name <- trimws(df[[campus_name_col]])
+  } else {
+    result$campus_name <- rep(NA_character_, n_rows)
   }
 
   district_name_col <- find_col(c("DISTNAME", "DISTRICTNAME"))
   if (!is.null(district_name_col)) {
     result$district_name <- trimws(df[[district_name_col]])
+  } else {
+    result$district_name <- rep(NA_character_, n_rows)
   }
 
   # County and region
@@ -244,10 +253,12 @@ process_district_enr <- function(df, end_year) {
   # Campus ID is NA for district rows
   result$campus_id <- rep(NA_character_, n_rows)
 
-  # Names
+  # Names - always create columns, even if NA (for backfill later)
   district_name_col <- find_col(c("DISTNAME", "DISTRICTNAME"))
   if (!is.null(district_name_col)) {
     result$district_name <- trimws(df[[district_name_col]])
+  } else {
+    result$district_name <- rep(NA_character_, n_rows)
   }
 
   result$campus_name <- rep(NA_character_, n_rows)
@@ -382,4 +393,191 @@ create_state_aggregate <- function(district_df, end_year) {
   }
 
   state_row
+}
+
+
+# ==============================================================================
+# Name Backfill Functions
+# ==============================================================================
+#
+# TAPR data for 2013-2020 does not include DISTNAME or CAMPNAME in the
+# combined DSTUD/CSTUD download. These functions backfill missing names
+# using a reference lookup from the nearest year that has them (2021+).
+#
+# The lookup is cached in a package-level environment to avoid redundant
+# downloads when processing multiple years.
+#
+# ==============================================================================
+
+# Package-level environment for caching name lookups
+.name_lookup_cache <- new.env(parent = emptyenv())
+
+
+#' Get district name lookup table
+#'
+#' Downloads district reference data from a year that includes DISTNAME
+#' and returns a district_id -> district_name mapping. The result is cached
+#' so subsequent calls don't re-download.
+#'
+#' @return Data frame with district_id and district_name columns, or NULL
+#'   if the lookup cannot be built
+#' @keywords internal
+get_district_name_lookup <- function() {
+
+  # Return cached lookup if available
+  if (exists("district_lookup", envir = .name_lookup_cache)) {
+    return(get("district_lookup", envir = .name_lookup_cache))
+  }
+
+  # Try to build lookup from 2021 (first TAPR year with names)
+  lookup <- tryCatch({
+    raw_ref <- download_tapr_combined(2021, "D")
+
+    if (!"DISTNAME" %in% names(raw_ref) || !"DISTRICT" %in% names(raw_ref)) {
+      warning("Reference year 2021 district data missing DISTNAME column")
+      return(NULL)
+    }
+
+    df <- data.frame(
+      district_id = clean_id(raw_ref[["DISTRICT"]]),
+      district_name = trimws(raw_ref[["DISTNAME"]]),
+      stringsAsFactors = FALSE
+    )
+
+    # Remove duplicates and NAs
+    df <- df[!is.na(df$district_id) & !is.na(df$district_name), ]
+    df <- df[!duplicated(df$district_id), ]
+
+    df
+  }, error = function(e) {
+    warning("Could not build district name lookup: ", e$message)
+    NULL
+  })
+
+  # Cache the result (even if NULL, to avoid retrying)
+  assign("district_lookup", lookup, envir = .name_lookup_cache)
+
+  lookup
+}
+
+
+#' Get campus name lookup table
+#'
+#' Downloads campus reference data from a year that includes CAMPNAME
+#' and returns a campus_id -> (campus_name, district_name) mapping.
+#' The result is cached so subsequent calls don't re-download.
+#'
+#' @return Data frame with campus_id, campus_name, and district_name columns,
+#'   or NULL if the lookup cannot be built
+#' @keywords internal
+get_campus_name_lookup <- function() {
+
+  # Return cached lookup if available
+  if (exists("campus_lookup", envir = .name_lookup_cache)) {
+    return(get("campus_lookup", envir = .name_lookup_cache))
+  }
+
+  # Try to build lookup from 2021 (first TAPR year with names)
+  lookup <- tryCatch({
+    raw_ref <- download_tapr_combined(2021, "C")
+
+    if (!"CAMPNAME" %in% names(raw_ref) || !"CAMPUS" %in% names(raw_ref)) {
+      warning("Reference year 2021 campus data missing CAMPNAME column")
+      return(NULL)
+    }
+
+    df <- data.frame(
+      campus_id = clean_id(raw_ref[["CAMPUS"]]),
+      campus_name = trimws(raw_ref[["CAMPNAME"]]),
+      stringsAsFactors = FALSE
+    )
+
+    # Add district_name if available
+    if ("DISTNAME" %in% names(raw_ref)) {
+      df$district_name <- trimws(raw_ref[["DISTNAME"]])
+    }
+
+    # Remove duplicates and NAs
+    df <- df[!is.na(df$campus_id) & !is.na(df$campus_name), ]
+    df <- df[!duplicated(df$campus_id), ]
+
+    df
+  }, error = function(e) {
+    warning("Could not build campus name lookup: ", e$message)
+    NULL
+  })
+
+  # Cache the result
+  assign("campus_lookup", lookup, envir = .name_lookup_cache)
+
+  lookup
+}
+
+
+#' Backfill missing district names
+#'
+#' If district_name is all NA in the processed data, joins a name lookup
+#' from a reference year to populate district names.
+#'
+#' @param df Processed district data frame
+#' @return Data frame with district_name populated (where possible)
+#' @keywords internal
+backfill_district_names <- function(df) {
+
+  # Skip if district_name is already populated
+  if (!"district_name" %in% names(df)) return(df)
+  if (!all(is.na(df$district_name))) return(df)
+  if (!"district_id" %in% names(df)) return(df)
+
+  lookup <- get_district_name_lookup()
+  if (is.null(lookup)) return(df)
+
+  # Join lookup by district_id
+  df$district_name <- lookup$district_name[
+    match(df$district_id, lookup$district_id)
+  ]
+
+  df
+}
+
+
+#' Backfill missing campus names
+#'
+#' If campus_name is all NA in the processed data, joins a name lookup
+#' from a reference year to populate campus and district names.
+#'
+#' @param df Processed campus data frame
+#' @return Data frame with campus_name and district_name populated (where possible)
+#' @keywords internal
+backfill_campus_names <- function(df) {
+
+  # Backfill campus_name if missing
+  if ("campus_name" %in% names(df) && all(is.na(df$campus_name)) &&
+      "campus_id" %in% names(df)) {
+
+    lookup <- get_campus_name_lookup()
+    if (!is.null(lookup)) {
+      idx <- match(df$campus_id, lookup$campus_id)
+      df$campus_name <- lookup$campus_name[idx]
+
+      # Also backfill district_name from campus lookup if needed
+      if ("district_name" %in% names(df) && all(is.na(df$district_name)) &&
+          "district_name" %in% names(lookup)) {
+        df$district_name <- lookup$district_name[idx]
+      }
+    }
+  }
+
+  # If campus district_name is still NA, try district lookup
+  if ("district_name" %in% names(df) && all(is.na(df$district_name)) &&
+      "district_id" %in% names(df)) {
+    dist_lookup <- get_district_name_lookup()
+    if (!is.null(dist_lookup)) {
+      df$district_name <- dist_lookup$district_name[
+        match(df$district_id, dist_lookup$district_id)
+      ]
+    }
+  }
+
+  df
 }
