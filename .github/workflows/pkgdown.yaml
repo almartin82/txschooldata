@@ -17,7 +17,7 @@ permissions: read-all
 jobs:
   pkgdown:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     concurrency:
       group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
@@ -35,8 +35,9 @@ jobs:
         with:
           path: |
             ~/.cache/R
+            ~/.cache/txschooldata
             ~/.local/share/R
-          key: txschooldata-data-${{ runner.os }}-${{ hashFiles('DESCRIPTION') }}
+          key: txschooldata-data-${{ runner.os }}-${{ hashFiles('DESCRIPTION') }}-v2
           restore-keys: |
             txschooldata-data-${{ runner.os }}-
       - uses: r-lib/actions/setup-r-dependencies@v2
@@ -46,7 +47,7 @@ jobs:
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
-        timeout-minutes: 60
+        timeout-minutes: 120
       - name: Deploy to GitHub pages
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.5.0

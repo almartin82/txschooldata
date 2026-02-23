@@ -8,11 +8,17 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
+data_available <- tryCatch({
+  test <- txschooldata::fetch_enr(2024, use_cache = TRUE)
+  nrow(test) > 0
+}, error = function(e) FALSE)
+
 knitr::opts_chunk$set(
   echo = TRUE,
   message = FALSE,
   warning = FALSE,
-  eval = FALSE
+  eval = data_available,
+  cache = TRUE
 )
 ```
 
@@ -77,7 +83,7 @@ enr |>
 ## Demographics for One District
 
 ```{r district-demo}
-# Austin ISD demographics
+# Houston ISD demographics (district_id 101912)
 enr |>
   filter(
     district_id == "101912",
@@ -104,7 +110,7 @@ enr_multi |>
 
 For one column per demographic:
 
-```{r wide}
+```{r wide, eval=FALSE}
 enr_wide <- fetch_enr(2024, tidy = FALSE, use_cache = TRUE)
 ```
 
@@ -154,7 +160,7 @@ clear_cache(2024)
 
 ## Next Steps
 
-- See [10 Things You Didn't Know About Texas Schools](district-hooks.html) for analysis examples
+- See [15 Things You Didn't Know About Texas Schools](district-hooks.html) for analysis examples
 - Use `?fetch_enr` for complete function documentation
 
 ## Session Info
