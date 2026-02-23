@@ -23,7 +23,7 @@
 #' @section ID System:
 #' Texas uses a hierarchical ID system:
 #' \itemize{
-#'   \item District IDs: 6 digits (e.g., 101912 = Austin ISD)
+#'   \item District IDs: 6 digits (e.g., 101912 = Houston ISD)
 #'   \item Campus IDs: 9 digits (district ID + 3-digit campus number)
 #' }
 #'

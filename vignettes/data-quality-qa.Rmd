@@ -8,18 +8,12 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-data_available <- tryCatch({
-  test <- txschooldata::fetch_enr(2024, use_cache = TRUE)
-  nrow(test) > 0
-}, error = function(e) FALSE)
-
 knitr::opts_chunk$set(
   echo = TRUE,
   message = FALSE,
   warning = FALSE,
   fig.width = 8,
   fig.height = 5,
-  eval = data_available,
   cache = TRUE
 )
 ```
