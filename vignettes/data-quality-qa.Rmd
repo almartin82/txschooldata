@@ -8,13 +8,19 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
+data_available <- tryCatch({
+  test <- txschooldata::fetch_enr(2024, use_cache = TRUE)
+  nrow(test) > 0
+}, error = function(e) FALSE)
+
 knitr::opts_chunk$set(
   echo = TRUE,
   message = FALSE,
   warning = FALSE,
   fig.width = 8,
   fig.height = 5,
-  eval = FALSE
+  eval = data_available,
+  cache = TRUE
 )
 ```
 
@@ -40,7 +46,7 @@ library(scales)
 ```{r download-multi-year, cache=TRUE}
 # Download enrollment data for available years
 years <- 2020:2024
-enr_multi <- fetch_enr_multi(years, use_eval = FALSE)
+enr_multi <- fetch_enr_multi(years, use_cache = TRUE)
 
 # State-level total enrollment by year
 state_totals <- enr_multi %>%
@@ -48,16 +54,20 @@ state_totals <- enr_multi %>%
   select(end_year, n_students) %>%
   arrange(end_year)
 
+stopifnot(nrow(state_totals) > 0)
 print(state_totals)
 ```
 
 ### Statewide Enrollment Trend
 
 ```{r state-trend-plot}
+print(state_totals)
+
 state_totals %>%
   ggplot(aes(x = end_year, y = n_students)) +
   geom_line(linewidth = 1.2, color = "#003366") +
   geom_point(size = 3, color = "#003366") +
+  geom_vline(xintercept = 2020.5, linetype = "dotted", color = "gray50") +
   scale_y_continuous(labels = comma, limits = c(0, NA)) +
   labs(
     title = "Texas Public School Enrollment",
@@ -134,16 +144,20 @@ current_enrollment <- district_trends %>%
   filter(end_year == max(end_year)) %>%
   arrange(desc(n_students))
 
+stopifnot(nrow(current_enrollment) > 0)
 print(current_enrollment)
 ```
 
 ### District Enrollment Trends
 
 ```{r district-trend-plot}
+print(district_trends %>% select(end_year, district_label, n_students))
+
 district_trends %>%
   ggplot(aes(x = end_year, y = n_students, color = district_label)) +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
+  geom_vline(xintercept = 2020.5, linetype = "dotted", color = "gray50") +
   scale_y_continuous(labels = comma) +
   scale_color_brewer(palette = "Set1") +
   labs(
