@@ -62,16 +62,32 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>Texas has the second-largest public school system in America – <strong>5.5 million students</strong> across 1,200+ districts. <code>txschooldata</code> gives you one-line access to enrollment, demographics, graduation rates, and STAAR assessment data directly from the Texas Education Agency (TEA), covering 1997 through 2025. No manual downloads, no scraping, no file wrangling.</p>
-<p>This package is part of the <a href="https://github.com/almartin82/njschooldata" class="external-link">njschooldata</a> family – a set of R and Python packages providing consistent access to state-published school data for all 50 states.</p>
+<p>An R package for fetching and processing Texas school enrollment, graduation, and assessment data from the Texas Education Agency (TEA). Texas public schools enroll <strong>5.5 million students</strong> across 1,200+ districts – the second-largest school system in the United States. One function call pulls it all into R.</p>
+<p>This package is part of the <a href="https://github.com/almartin82/njschooldata" class="external-link">njschooldata</a> family of packages providing consistent access to state education data.</p>
 <p><strong>Documentation: <a href="https://almartin82.github.io/txschooldata/" class="uri">https://almartin82.github.io/txschooldata/</a></strong></p>
 <div class="section level2">
-<h2 id="r-quickstart">R Quickstart<a class="anchor" aria-label="anchor" href="#r-quickstart"></a>
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
+<div class="section level3">
+<h3 id="r">R<a class="anchor" aria-label="anchor" href="#r"></a>
+</h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"almartin82/txschooldata"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+</div>
+<div class="section level3">
+<h3 id="python">Python<a class="anchor" aria-label="anchor" href="#python"></a>
+</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>pip install git<span class="sc">+</span>https<span class="sc">:</span><span class="er">//</span>github.com<span class="sc">/</span>almartin82<span class="sc">/</span>txschooldata.git<span class="co">#subdirectory=pytxschooldata</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h2>
+<div class="section level3">
+<h3 id="r-1">R<a class="anchor" aria-label="anchor" href="#r-1"></a>
+</h3>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://almartin82.github.io/txschooldata/">txschooldata</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
@@ -83,52 +99,35 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 5,517,464 students</span></span></code></pre></div>
+</div>
 <div class="section level3">
-<h3 id="staar-assessment-data">STAAR Assessment Data<a class="anchor" aria-label="anchor" href="#staar-assessment-data"></a>
+<h3 id="python-1">Python<a class="anchor" aria-label="anchor" href="#python-1"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Fetch 2023 STAAR data for Grade 3 Math (district level)</span></span>
-<span><span class="va">staar</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fetch_staar.html">fetch_staar</a></span><span class="op">(</span><span class="fl">2023</span>, <span class="st">"district"</span>, <span class="fl">3</span>, subject <span class="op">=</span> <span class="st">"english"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Get Houston ISD performance</span></span>
-<span><span class="va">staar</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">district_id</span> <span class="op">==</span> <span class="st">"101912"</span>, <span class="va">subject</span> <span class="op">==</span> <span class="st">"Math"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">all_total</span>, <span class="va">all_did_not_meet</span>, <span class="va">all_approaches</span>, <span class="va">all_meets</span>, <span class="va">all_masters</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   district_name all_total all_did_not_meet all_approaches all_meets all_masters</span></span>
-<span><span class="co">#&gt; 1   HOUSTON ISD     10846             3488           7358      4716        3623</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="im">from</span> pytxschooldata <span class="im">import</span> fetch_enr</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>enr <span class="op">=</span> fetch_enr(<span class="dv">2024</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="bu">print</span>(enr.head())</span></code></pre></div>
 </div>
-</div>
-<div class="section level2">
-<h2 id="python-quickstart">Python Quickstart<a class="anchor" aria-label="anchor" href="#python-quickstart"></a>
-</h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">pip</span> install pytxschooldata</span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="im">from</span> pytxschooldata <span class="im">import</span> fetch_enr</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>enr <span class="op">=</span> fetch_enr(<span class="dv">2024</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="bu">print</span>(enr.head())</span></code></pre></div>
-<p>The Python package wraps the R package via <code>rpy2</code> and returns pandas DataFrames. It exposes <code><a href="reference/fetch_enr.html">fetch_enr()</a></code>, <code><a href="reference/fetch_enr_multi.html">fetch_enr_multi()</a></code>, <code><a href="reference/tidy_enr.html">tidy_enr()</a></code>, and <code><a href="reference/get_available_years.html">get_available_years()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="what-can-you-find-with-txschooldata">What can you find with txschooldata?<a class="anchor" aria-label="anchor" href="#what-can-you-find-with-txschooldata"></a>
 </h2>
-<p>Texas public schools enroll <strong>5.5 million students</strong> across 1,200+ districts. One function call pulls it all into R:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://almartin82.github.io/txschooldata/">txschooldata</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://scales.r-lib.org" class="external-link">scales</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Grab 5 years of enrollment data</span></span>
+<span><span class="co"># Fetch 5 years of enrollment data</span></span>
 <span><span class="va">enr</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fetch_enr_multi.html">fetch_enr_multi</a></span><span class="op">(</span><span class="fl">2020</span><span class="op">:</span><span class="fl">2024</span>, use_cache <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Here are fifteen narratives hiding in the numbers.</p>
 <hr>
 <div class="section level3">
 <h3 id="id_1-covid-erased-a-decade-of-growth-in-one-year">1. COVID erased a decade of growth in one year<a class="anchor" aria-label="anchor" href="#id_1-covid-erased-a-decade-of-growth-in-one-year"></a>
 </h3>
-<p>The pandemic caused the largest single-year enrollment drop in Texas history. Between 2020 and 2021, Texas public schools lost <strong>120,133 students</strong> – equivalent to the entire enrollment of El Paso ISD.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">state_trend</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">end_year</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -136,6 +135,9 @@
 <span>    change <span class="op">=</span> <span class="va">n_students</span> <span class="op">-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span>,</span>
 <span>    pct_change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">change</span> <span class="op">/</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">state_trend</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">state_trend</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   end_year n_students  change pct_change</span></span>
 <span><span class="co">#&gt; 1     2020    5479173      NA         NA</span></span>
 <span><span class="co">#&gt; 2     2021    5359040 -120133      -2.19</span></span>
@@ -143,53 +145,38 @@
 <span><span class="co">#&gt; 4     2023    5504150  101222       1.87</span></span>
 <span><span class="co">#&gt; 5     2024    5517464   13314       0.24</span></span></code></pre></div>
 <p><strong>-120,133 students</strong> vanished between 2020 and 2021 – equivalent to the entire enrollment of El Paso ISD.</p>
-<div class="float">
-<img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/covid-plot-1.png" alt="COVID enrollment drop"><div class="figcaption">COVID enrollment drop</div>
-</div>
-<hr>
+<figure><img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/covid-plot-1.png" alt="COVID enrollment drop"><figcaption aria-hidden="true">
+COVID enrollment drop
+</figcaption></figure><hr>
 </div>
 <div class="section level3">
 <h3 id="id_2-one-in-four-students-is-now-an-english-learner">2. One in four students is now an English learner<a class="anchor" aria-label="anchor" href="#id_2-one-in-four-students-is-now-an-english-learner"></a>
 </h3>
-<p>The proportion of LEP students grew by 4.1 percentage points in five years – from 20.3% to 24.4%. This is the single largest demographic shift in the data.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lep_trend</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"lep"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct_display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">lep_trend</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct_display</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">lep_trend</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">lep_trend</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct_display</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   end_year n_students pct_display</span></span>
 <span><span class="co">#&gt; 1     2020    1112674        20.3</span></span>
 <span><span class="co">#&gt; 2     2021    1108207        20.7</span></span>
 <span><span class="co">#&gt; 3     2022    1171661        21.7</span></span>
 <span><span class="co">#&gt; 4     2023    1269408        23.1</span></span>
 <span><span class="co">#&gt; 5     2024    1344804        24.4</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">lep_trend</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">end_year</span>, y <span class="op">=</span> <span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.2</span>, color <span class="op">=</span> <span class="st">"#E69F00"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span>, color <span class="op">=</span> <span class="st">"#E69F00"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">25</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">2024.3</span>, y <span class="op">=</span> <span class="fl">25.5</span>, label <span class="op">=</span> <span class="st">"1 in 4"</span>, color <span class="op">=</span> <span class="st">"gray40"</span>, size <span class="op">=</span> <span class="fl">3.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">19</span>, <span class="fl">27</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Rise of English Learners"</span>,</span>
-<span>    subtitle <span class="op">=</span> <span class="st">"LEP students as % of total enrollment"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"School Year (End)"</span>, y <span class="op">=</span> <span class="st">"Percent"</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/lep-plot-1.png" alt="LEP trend"><div class="figcaption">LEP trend</div>
-</div>
-<p>From 20.3% to <strong>24.4%</strong> in five years. Schools need more ESL teachers than ever.</p>
+<figure><img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/lep-plot-1.png" alt="LEP trend"><figcaption aria-hidden="true">
+LEP trend
+</figcaption></figure><p>From 20.3% to <strong>24.4%</strong> in five years. Schools need more ESL teachers than ever.</p>
 <hr>
 </div>
 <div class="section level3">
 <h3 id="id_3-coppell-isd-is-texass-first-asian-majority-district">3. Coppell ISD is Texas’s first Asian-majority district<a class="anchor" aria-label="anchor" href="#id_3-coppell-isd-is-texass-first-asian-majority-district"></a>
 </h3>
-<p>In a striking demographic shift, Coppell ISD became Texas’s first Asian-majority public school district, with <strong>56.7%</strong> of students identifying as Asian in 2024.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Districts with highest Asian percentage</span></span>
+<span><span class="va">asian_top</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"asian"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>, <span class="va">end_year</span> <span class="op">==</span> <span class="fl">2024</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span></span>
 <span>    <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>,</span>
@@ -202,6 +189,9 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">total</span>, <span class="va">n_students</span>, <span class="va">pct</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">asian_top</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">asian_top</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     district_name total n_students  pct</span></span>
 <span><span class="co">#&gt; 1     COPPELL ISD 13394       7591 56.7</span></span>
 <span><span class="co">#&gt; 2      FRISCO ISD 66551      28349 42.6</span></span>
@@ -214,14 +204,16 @@
 <span><span class="co">#&gt; 9       WYLIE ISD 19166       3227 16.8</span></span>
 <span><span class="co">#&gt; 10 LEWISVILLE ISD 48356       8123 16.8</span></span></code></pre></div>
 <p><strong>56.7% Asian</strong>. Frisco ISD jumped from 33.6% to 42.6% in just three years.</p>
-<hr>
+<figure><img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/frisco-trend-1.png" alt="Frisco Asian growth"><figcaption aria-hidden="true">
+Frisco Asian growth
+</figcaption></figure><hr>
 </div>
 <div class="section level3">
 <h3 id="id_4-fort-worth-isd-lost-14-of-its-students">4. Fort Worth ISD lost 14% of its students<a class="anchor" aria-label="anchor" href="#id_4-fort-worth-isd-lost-14-of-its-students"></a>
 </h3>
-<p>While statewide enrollment recovered after COVID, urban districts continue to lose students. Fort Worth ISD lost <strong>11,801 students</strong> (-14.3%), making it the fastest-declining large district in Texas.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">d2020</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Calculate 2020-2024 changes using district_id (2020 data has NA names)</span></span>
+<span><span class="va">d2020</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>,</span>
 <span>         <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>, <span class="va">end_year</span> <span class="op">==</span> <span class="fl">2020</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_id</span>, n_2020 <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span></span>
@@ -231,16 +223,22 @@
 <span>         <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>, <span class="va">end_year</span> <span class="op">==</span> <span class="fl">2024</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_id</span>, <span class="va">district_name</span>, n_2024 <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">d2020</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">losses</span> <span class="op">&lt;-</span> <span class="va">d2020</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span><span class="va">d2024</span>, by <span class="op">=</span> <span class="st">"district_id"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    change <span class="op">=</span> <span class="va">n_2024</span> <span class="op">-</span> <span class="va">n_2020</span>,</span>
 <span>    pct_change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="op">(</span><span class="va">change</span> <span class="op">/</span> <span class="va">n_2020</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Largest percentage losses among big districts</span></span>
+<span><span class="va">top_losses</span> <span class="op">&lt;-</span> <span class="va">losses</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n_2020</span> <span class="op">&gt;=</span> <span class="fl">10000</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">pct_change</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">n_2020</span>, <span class="va">n_2024</span>, <span class="va">change</span>, <span class="va">pct_change</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">top_losses</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">top_losses</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      district_name n_2020 n_2024 change pct_change</span></span>
 <span><span class="co">#&gt; 1   FORT WORTH ISD  82704  70903 -11801      -14.3</span></span>
 <span><span class="co">#&gt; 2       ALDINE ISD  67130  57737  -9393      -14.0</span></span>
@@ -256,53 +254,65 @@
 <hr>
 </div>
 <div class="section level3">
-<h3 id="id_5-idea-public-schools-grew-24-in-three-years">5. IDEA Public Schools grew 24% in three years<a class="anchor" aria-label="anchor" href="#id_5-idea-public-schools-grew-24-in-three-years"></a>
+<h3 id="id_5-idea-public-schools-grew-55-in-five-years">5. IDEA Public Schools grew 55% in five years<a class="anchor" aria-label="anchor" href="#id_5-idea-public-schools-grew-55-in-five-years"></a>
 </h3>
-<p>IDEA Public Schools, a charter network operating across Texas, grew from 62,158 to 76,819 students between 2021 and 2024 – a gain of <strong>14,661 students</strong> (+23.6%).</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Use district_id join to include 2020 (which has NA district_name)</span></span>
+<span><span class="va">idea_trend</span> <span class="op">&lt;-</span> <span class="va">losses</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"IDEA"</span>, <span class="va">district_name</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">idea_trend</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">idea_trend</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">n_2020</span>, <span class="va">n_2024</span>, <span class="va">change</span>, <span class="va">pct_change</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         district_name n_2020 n_2024 change pct_change</span></span>
+<span><span class="co">#&gt; 1 IDEA PUBLIC SCHOOLS  49480  76819  27339       55.3</span></span>
+<span></span>
+<span><span class="co"># Year-by-year for 2021-2024 (name filter works for these years)</span></span>
+<span><span class="va">idea_yearly</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">district_name</span> <span class="op">==</span> <span class="st">"IDEA PUBLIC SCHOOLS"</span>, <span class="va">is_district</span>,</span>
 <span>         <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">end_year</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">idea_yearly</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">idea_yearly</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   end_year n_students</span></span>
 <span><span class="co">#&gt; 1     2021      62158</span></span>
 <span><span class="co">#&gt; 2     2022      67988</span></span>
 <span><span class="co">#&gt; 3     2023      74217</span></span>
 <span><span class="co">#&gt; 4     2024      76819</span></span></code></pre></div>
-<p>From 62,158 to <strong>76,819 students</strong>. Charter networks are reshaping Texas education.</p>
+<p>From 49,480 to <strong>76,819 students</strong> (+55.3%). Charter networks are reshaping Texas education.</p>
 <hr>
 </div>
 <div class="section level3">
 <h3 id="id_6-fort-bend-isd-has-no-racial-majority">6. Fort Bend ISD has no racial majority<a class="anchor" aria-label="anchor" href="#id_6-fort-bend-isd-has-no-racial-majority"></a>
 </h3>
-<p>Fort Bend ISD is one of the most diverse school districts in America. No racial group exceeds 28% of enrollment – White (13.2%), Black (27.8%), Hispanic (26.7%), and Asian (27.6%) students are nearly equally represented.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fb_demo</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">district_name</span> <span class="op">==</span> <span class="st">"FORT BEND ISD"</span>, <span class="va">is_district</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
 <span>         <span class="va">subgroup</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"white"</span>, <span class="st">"black"</span>, <span class="st">"hispanic"</span>, <span class="st">"asian"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">subgroup</span>, <span class="va">pct</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">subgroup</span>, values_from <span class="op">=</span> <span class="va">pct</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 4 x 5</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">fb_demo</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fb_demo</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 4 × 5</span></span>
 <span><span class="co">#&gt;   end_year white black hispanic asian</span></span>
 <span><span class="co">#&gt;      &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1     2021  14.8  27.5     26.4  27.3</span></span>
 <span><span class="co">#&gt; 2     2022  14.7  27.8     26.6  26.7</span></span>
 <span><span class="co">#&gt; 3     2023  13.8  27.8     26.7  27.3</span></span>
 <span><span class="co">#&gt; 4     2024  13.2  27.8     26.7  27.6</span></span></code></pre></div>
-<div class="float">
-<img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/diversity-chart-1.png" alt="Fort Bend diversity"><div class="figcaption">Fort Bend diversity</div>
-</div>
 <p>No group exceeds 28%. One of the most diverse large districts in America.</p>
-<hr>
+<figure><img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/diversity-chart-1.png" alt="Fort Bend demographics"><figcaption aria-hidden="true">
+Fort Bend demographics
+</figcaption></figure><hr>
 </div>
 <div class="section level3">
 <h3 id="id_7-kindergarten-enrollment-dropped-58">7. Kindergarten enrollment dropped 5.8%<a class="anchor" aria-label="anchor" href="#id_7-kindergarten-enrollment-dropped-58"></a>
 </h3>
-<p>Kindergarten enrollment fell from 383,585 to 361,329 – a drop of 22,256 students (-5.8%). This could signal declining birth rates, rising private school enrollment, or families delaying school entry.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">grade_trend</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>,</span>
 <span>         <span class="va">grade_level</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PK"</span>, <span class="st">"K"</span>, <span class="st">"01"</span>, <span class="st">"05"</span>, <span class="st">"09"</span>, <span class="st">"12"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">grade_level</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -311,7 +321,10 @@
 <span>    change <span class="op">=</span> <span class="va">`2024`</span> <span class="op">-</span> <span class="va">`2020`</span>,</span>
 <span>    pct_change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">change</span> <span class="op">/</span> <span class="va">`2020`</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 x 8</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">grade_trend</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">grade_trend</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 8</span></span>
 <span><span class="co">#&gt;   grade_level `2020` `2021` `2022` `2023` `2024` change pct_change</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1 PK          248413 196560 222767 243493 247979   -434       -0.2</span></span>
@@ -326,89 +339,56 @@
 <div class="section level3">
 <h3 id="id_8-62-of-students-are-economically-disadvantaged">8. 62% of students are economically disadvantaged<a class="anchor" aria-label="anchor" href="#id_8-62-of-students-are-economically-disadvantaged"></a>
 </h3>
-<p>The share of economically disadvantaged students grew from 60.3% to 62.3% – nearly two-thirds of all students in Texas public schools.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">econ_trend</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"econ_disadv"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">econ_trend</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">econ_trend</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">econ_trend</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   end_year n_students  pct</span></span>
 <span><span class="co">#&gt; 1     2020    3303974 60.3</span></span>
 <span><span class="co">#&gt; 2     2021    3229178 60.3</span></span>
 <span><span class="co">#&gt; 3     2022    3278452 60.7</span></span>
 <span><span class="co">#&gt; 4     2023    3415987 62.1</span></span>
 <span><span class="co">#&gt; 5     2024    3434955 62.3</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">econ_trend</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">end_year</span>, y <span class="op">=</span> <span class="va">pct</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"#56B4E9"</span>, width <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">50</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">pct</span>, <span class="st">"%"</span><span class="op">)</span><span class="op">)</span>, vjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.3</span>, size <span class="op">=</span> <span class="fl">3.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">70</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Economically Disadvantaged Students"</span>,</span>
-<span>    subtitle <span class="op">=</span> <span class="st">"Percentage of total enrollment"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"School Year (End)"</span>, y <span class="op">=</span> <span class="st">"Percent"</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/econ-plot-1.png" alt="Econ disadvantaged trend"><div class="figcaption">Econ disadvantaged trend</div>
-</div>
-<p>Up from 60.3%. Nearly two-thirds of Texas students qualify.</p>
+<figure><img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/econ-plot-1.png" alt="Econ disadvantaged trend"><figcaption aria-hidden="true">
+Econ disadvantaged trend
+</figcaption></figure><p>Up from 60.3%. Nearly two-thirds of Texas students qualify.</p>
 <hr>
 </div>
 <div class="section level3">
 <h3 id="id_9-white-students-dropped-below-25">9. White students dropped below 25%<a class="anchor" aria-label="anchor" href="#id_9-white-students-dropped-below-25"></a>
 </h3>
-<p>White enrollment declined from 27.0% to 25.0% of total enrollment – a 2 percentage point drop in just five years. Meanwhile, Hispanic (53.2%) and Asian (5.4%) shares continue to grow.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">demo_shift</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
 <span>         <span class="va">subgroup</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"white"</span>, <span class="st">"black"</span>, <span class="st">"hispanic"</span>, <span class="st">"asian"</span>, <span class="st">"multiracial"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">subgroup</span>, <span class="va">pct</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">subgroup</span>, values_from <span class="op">=</span> <span class="va">pct</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 5 x 6</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">demo_shift</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">demo_shift</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 5 × 6</span></span>
 <span><span class="co">#&gt;   end_year white black hispanic asian multiracial</span></span>
 <span><span class="co">#&gt;      &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1     2020  27    12.6     52.8   4.6         2.5</span></span>
 <span><span class="co">#&gt; 2     2021  26.5  12.7     52.9   4.7         2.7</span></span>
 <span><span class="co">#&gt; 3     2022  26.3  12.8     52.8   4.8         2.9</span></span>
-<span><span class="co">#&gt; 4     2023  25.6  12.8     53     5.1         3</span></span>
+<span><span class="co">#&gt; 4     2023  25.6  12.8     53     5.1         3  </span></span>
 <span><span class="co">#&gt; 5     2024  25    12.8     53.2   5.4         3.1</span></span></code></pre></div>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
-<span>         <span class="va">subgroup</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"white"</span>, <span class="st">"black"</span>, <span class="st">"hispanic"</span>, <span class="st">"asian"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct <span class="op">=</span> <span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">end_year</span>, y <span class="op">=</span> <span class="va">pct</span>, color <span class="op">=</span> <span class="va">subgroup</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span></span>
-<span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hispanic"</span> <span class="op">=</span> <span class="st">"#0072B2"</span>, <span class="st">"white"</span> <span class="op">=</span> <span class="st">"#E69F00"</span>,</span>
-<span>               <span class="st">"black"</span> <span class="op">=</span> <span class="st">"#009E73"</span>, <span class="st">"asian"</span> <span class="op">=</span> <span class="st">"#CC79A7"</span><span class="op">)</span>,</span>
-<span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Asian"</span>, <span class="st">"Black"</span>, <span class="st">"Hispanic"</span>, <span class="st">"White"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Texas Public School Demographics"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"School Year (End)"</span>, y <span class="op">=</span> <span class="st">"Percent of Enrollment"</span>,</span>
-<span>    color <span class="op">=</span> <span class="cn">NULL</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/demo-plot-1.png" alt="Demographics over time"><div class="figcaption">Demographics over time</div>
-</div>
-<p>Hispanic students are now <strong>53.2%</strong> of enrollment.</p>
+<figure><img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/demo-plot-1.png" alt="Demographics over time"><figcaption aria-hidden="true">
+Demographics over time
+</figcaption></figure><p>Hispanic students are now <strong>53.2%</strong> of enrollment.</p>
 <hr>
 </div>
 <div class="section level3">
 <h3 id="id_10-439-districts-now-have-hispanic-majorities">10. 439 districts now have Hispanic majorities<a class="anchor" aria-label="anchor" href="#id_10-439-districts-now-have-hispanic-majorities"></a>
 </h3>
-<p>The number of districts where Hispanic students are the majority grew from 419 in 2020 to <strong>439 in 2024</strong> – now 36% of all Texas districts.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hisp_majority</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"hispanic"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>majority <span class="op">=</span> <span class="va">pct</span> <span class="op">&gt;</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">end_year</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -418,7 +398,10 @@
 <span>    pct_majority <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">hispanic_majority</span> <span class="op">/</span> <span class="va">total_districts</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 5 x 4</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">hisp_majority</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hisp_majority</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 5 × 4</span></span>
 <span><span class="co">#&gt;   end_year total_districts hispanic_majority pct_majority</span></span>
 <span><span class="co">#&gt;      &lt;int&gt;           &lt;int&gt;             &lt;int&gt;        &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1     2020            1202               419         34.9</span></span>
@@ -426,117 +409,93 @@
 <span><span class="co">#&gt; 3     2022            1207               433         35.9</span></span>
 <span><span class="co">#&gt; 4     2023            1209               438         36.2</span></span>
 <span><span class="co">#&gt; 5     2024            1207               439         36.4</span></span></code></pre></div>
-<p>Up from 419 in 2020. Now <strong>36%</strong> of all Texas school districts.</p>
+<p>Up from 419 in 2020. Now <strong>36.4%</strong> of all Texas school districts.</p>
 <hr>
 </div>
 <div class="section level3">
 <h3 id="id_11-houston-isd-vs-dallas-isd-two-giants-two-trajectories">11. Houston ISD vs Dallas ISD: two giants, two trajectories<a class="anchor" aria-label="anchor" href="#id_11-houston-isd-vs-dallas-isd-two-giants-two-trajectories"></a>
 </h3>
-<p>Houston ISD and Dallas ISD are the two largest traditional districts in Texas. Both lost students since 2020, but Houston’s losses are nearly double Dallas’s in absolute terms.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">big_two</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Use district_id to include 2020 (which has NA district_name)</span></span>
+<span><span class="va">big_two_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"101912"</span>, <span class="st">"057905"</span><span class="op">)</span>  <span class="co"># Houston ISD, Dallas ISD</span></span>
+<span></span>
+<span><span class="va">big_two</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
-<span>         <span class="va">district_name</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HOUSTON ISD"</span>, <span class="st">"DALLAS ISD"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">district_name</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">district_name</span>, values_from <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>         <span class="va">district_id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">big_two_ids</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>district_label <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>    <span class="va">district_id</span> <span class="op">==</span> <span class="st">"101912"</span> <span class="op">~</span> <span class="st">"HOUSTON ISD"</span>,</span>
+<span>    <span class="va">district_id</span> <span class="op">==</span> <span class="st">"057905"</span> <span class="op">~</span> <span class="st">"DALLAS ISD"</span></span>
+<span>  <span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">district_label</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">district_label</span>, values_from <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">end_year</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    houston_change <span class="op">=</span> <span class="va">`HOUSTON ISD`</span> <span class="op">-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">`HOUSTON ISD`</span><span class="op">)</span>,</span>
 <span>    dallas_change <span class="op">=</span> <span class="va">`DALLAS ISD`</span> <span class="op">-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">`DALLAS ISD`</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">big_two</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">big_two</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [output will be generated when vignette renders]</span></span></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
-<span>         <span class="va">district_name</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HOUSTON ISD"</span>, <span class="st">"DALLAS ISD"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">end_year</span>, y <span class="op">=</span> <span class="va">n_students</span>, color <span class="op">=</span> <span class="va">district_name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="va">comma</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DALLAS ISD"</span> <span class="op">=</span> <span class="st">"#0072B2"</span>, <span class="st">"HOUSTON ISD"</span> <span class="op">=</span> <span class="st">"#CC0000"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Houston ISD vs Dallas ISD Enrollment"</span>,</span>
-<span>    subtitle <span class="op">=</span> <span class="st">"Both declining, but Houston falling faster"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"School Year (End)"</span>, y <span class="op">=</span> <span class="st">"Total Students"</span>, color <span class="op">=</span> <span class="cn">NULL</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/houston-vs-dallas-plot-1.png" alt="Houston vs Dallas"><div class="figcaption">Houston vs Dallas</div>
-</div>
-<p>Houston lost <strong>25,706 students</strong> vs Dallas’s <strong>11,527</strong>. Both are losing ground to suburban and charter competitors.</p>
+<span><span class="co">#&gt; # A tibble: 5 × 5</span></span>
+<span><span class="co">#&gt;   end_year `DALLAS ISD` `HOUSTON ISD` houston_change dallas_change</span></span>
+<span><span class="co">#&gt;      &lt;int&gt;        &lt;dbl&gt;         &lt;dbl&gt;          &lt;dbl&gt;         &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1     2020       153784        209309             NA            NA</span></span>
+<span><span class="co">#&gt; 2     2021       145105        196550         -12759         -8679</span></span>
+<span><span class="co">#&gt; 3     2022       143430        193727          -2823         -1675</span></span>
+<span><span class="co">#&gt; 4     2023       141042        189290          -4437         -2388</span></span>
+<span><span class="co">#&gt; 5     2024       139096        183603          -5687         -1946</span></span></code></pre></div>
+<figure><img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/houston-vs-dallas-plot-1.png" alt="Houston vs Dallas"><figcaption aria-hidden="true">
+Houston vs Dallas
+</figcaption></figure><p>Houston lost <strong>25,706 students</strong> (-12.3%) vs Dallas’s <strong>14,688</strong> (-9.5%) between 2020 and 2024.</p>
 <hr>
 </div>
 <div class="section level3">
-<h3 id="id_12-special-education-identification-rose-to-12">12. Special education identification rose to 12%<a class="anchor" aria-label="anchor" href="#id_12-special-education-identification-rose-to-12"></a>
+<h3 id="id_12-nearly-1-in-7-students-receives-special-education">12. Nearly 1 in 7 students receives special education<a class="anchor" aria-label="anchor" href="#id_12-nearly-1-in-7-students-receives-special-education"></a>
 </h3>
-<p>The share of students receiving special education services has climbed steadily, reaching roughly <strong>12%</strong> of total enrollment by 2024. That means approximately 1 in 8 Texas students now receives special education services.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sped_trend</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"special_ed"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sped_2024</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"special_ed"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>, <span class="va">end_year</span> <span class="op">==</span> <span class="fl">2024</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct_display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">sped_trend</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct_display</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [output will be generated when vignette renders]</span></span></code></pre></div>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">sped_trend</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">end_year</span>, y <span class="op">=</span> <span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.2</span>, color <span class="op">=</span> <span class="st">"#009E73"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span>, color <span class="op">=</span> <span class="st">"#009E73"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%"</span><span class="op">)</span><span class="op">)</span>, vjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span>, size <span class="op">=</span> <span class="fl">3.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Special Education Growth"</span>,</span>
-<span>    subtitle <span class="op">=</span> <span class="st">"Students receiving special ed services as % of total"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"School Year (End)"</span>, y <span class="op">=</span> <span class="st">"Percent"</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/sped-plot-1.png" alt="Special ed growth"><div class="figcaption">Special ed growth</div>
-</div>
-<p>The increase likely reflects better identification, expanded definitions, and growing awareness of learning differences.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sped_2024</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sped_2024</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct_display</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   end_year n_students pct_display</span></span>
+<span><span class="co">#&gt; 1     2024     764858        13.9</span></span></code></pre></div>
+<p><strong>764,858 students</strong> (13.9%) receive special education services in 2024.</p>
 <hr>
 </div>
 <div class="section level3">
-<h3 id="id_13-frisco-isd-added-20000-students-in-five-years">13. Frisco ISD added 20,000 students in five years<a class="anchor" aria-label="anchor" href="#id_13-frisco-isd-added-20000-students-in-five-years"></a>
+<h3 id="id_13-suburban-boomtowns-are-reshaping-texas-education">13. Suburban boomtowns are reshaping Texas education<a class="anchor" aria-label="anchor" href="#id_13-suburban-boomtowns-are-reshaping-texas-education"></a>
 </h3>
-<p>Frisco ISD is one of the fastest-growing large districts in the state, adding <strong>20,259 students</strong> between 2020 and 2024 – a 44% increase. The suburban Collin County district shows no signs of slowing down.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">frisco_trend</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">district_name</span> <span class="op">==</span> <span class="st">"FRISCO ISD"</span>, <span class="va">is_district</span>,</span>
-<span>         <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">end_year</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    change <span class="op">=</span> <span class="va">n_students</span> <span class="op">-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span>,</span>
-<span>    pct_change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">change</span> <span class="op">/</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Top growing large districts (using district_id join for accurate 2020-2024 comparison)</span></span>
+<span><span class="va">suburban_growth</span> <span class="op">&lt;-</span> <span class="va">losses</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n_2020</span> <span class="op">&gt;=</span> <span class="fl">5000</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">pct_change</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">n_2020</span>, <span class="va">n_2024</span>, <span class="va">change</span>, <span class="va">pct_change</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">frisco_trend</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [output will be generated when vignette renders]</span></span></code></pre></div>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">frisco_trend</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">end_year</span>, y <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"#56B4E9"</span>, width <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span><span class="op">)</span>, vjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.3</span>, size <span class="op">=</span> <span class="fl">3.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="va">comma</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">75000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Frisco ISD Enrollment Surge"</span>,</span>
-<span>    subtitle <span class="op">=</span> <span class="st">"One of the fastest-growing large districts in Texas"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"School Year (End)"</span>, y <span class="op">=</span> <span class="st">"Total Students"</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/frisco-growth-plot-1.png" alt="Frisco ISD growth"><div class="figcaption">Frisco ISD growth</div>
-</div>
-<p>While urban cores lose students, suburban boomtowns like Frisco absorb the growth.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">suburban_growth</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">suburban_growth</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                  district_name n_2020 n_2024 change pct_change</span></span>
+<span><span class="co">#&gt; 1               HALLSVILLE ISD  11452  21266   9814       85.7</span></span>
+<span><span class="co">#&gt; 2                  PROSPER ISD  16789  28394  11605       69.1</span></span>
+<span><span class="co">#&gt; 3                PRINCETON ISD   5414   8671   3257       60.2</span></span>
+<span><span class="co">#&gt; 4                CLEVELAND ISD   7559  11945   4386       58.0</span></span>
+<span><span class="co">#&gt; 5          IDEA PUBLIC SCHOOLS  49480  76819  27339       55.3</span></span>
+<span><span class="co">#&gt; 6            MEDINA VALLEY ISD   5847   8656   2809       48.0</span></span>
+<span><span class="co">#&gt; 7         PREMIER HIGH SCHOOLS   5345   7819   2474       46.3</span></span>
+<span><span class="co">#&gt; 8  YES PREP PUBLIC SCHOOLS INC  12074  17622   5548       45.9</span></span>
+<span><span class="co">#&gt; 9                   FORNEY ISD  11944  16962   5018       42.0</span></span>
+<span><span class="co">#&gt; 10              ROYSE CITY ISD   6585   9338   2753       41.8</span></span></code></pre></div>
+<p>Hallsville ISD nearly doubled (+85.7%), Prosper ISD grew 69.1%. While urban cores lose students, suburban boomtowns absorb the growth.</p>
 <hr>
 </div>
 <div class="section level3">
 <h3 id="id_14-pre-k-enrollment-still-hasnt-recovered-from-covid">14. Pre-K enrollment still hasn’t recovered from COVID<a class="anchor" aria-label="anchor" href="#id_14-pre-k-enrollment-still-hasnt-recovered-from-covid"></a>
 </h3>
-<p>Pre-K enrollment cratered by <strong>21%</strong> during COVID (from 248,413 to 196,560). By 2024 it has clawed back to 247,979 – still <strong>434 students short</strong> of pre-pandemic levels.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pk_trend</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"PK"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -547,55 +506,39 @@
 <span>    vs_2020 <span class="op">=</span> <span class="va">n_students</span> <span class="op">-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/nth.html" class="external-link">first</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pk_trend</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pk_trend</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [output will be generated when vignette renders]</span></span></code></pre></div>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pk_trend</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">end_year</span>, y <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.2</span>, color <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span>, color <span class="op">=</span> <span class="st">"#D55E00"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">248413</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">2022</span>, y <span class="op">=</span> <span class="fl">251000</span>, label <span class="op">=</span> <span class="st">"2020 level"</span>, color <span class="op">=</span> <span class="st">"gray40"</span>, size <span class="op">=</span> <span class="fl">3.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="va">comma</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Pre-K Enrollment: The Slowest Recovery"</span>,</span>
-<span>    subtitle <span class="op">=</span> <span class="st">"Still below 2020 levels after four years"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"School Year (End)"</span>, y <span class="op">=</span> <span class="st">"Pre-K Students"</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/pk-recovery-plot-1.png" alt="Pre-K recovery"><div class="figcaption">Pre-K recovery</div>
-</div>
-<p>The slow Pre-K recovery matters because early childhood education is one of the highest-return investments in education.</p>
+<span><span class="co">#&gt;   end_year n_students change pct_change vs_2020</span></span>
+<span><span class="co">#&gt; 1     2020     248413     NA         NA       0</span></span>
+<span><span class="co">#&gt; 2     2021     196560 -51853      -20.9  -51853</span></span>
+<span><span class="co">#&gt; 3     2022     222767  26207       13.3  -25646</span></span>
+<span><span class="co">#&gt; 4     2023     243493  20726        9.3   -4920</span></span>
+<span><span class="co">#&gt; 5     2024     247979   4486        1.8    -434</span></span></code></pre></div>
+<figure><img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/pk-recovery-plot-1.png" alt="Pre-K recovery"><figcaption aria-hidden="true">
+Pre-K recovery
+</figcaption></figure><p>Pre-K cratered 21% during COVID. By 2024 it has clawed back to 247,979 – still <strong>434 students short</strong> of 2020 levels.</p>
 <hr>
 </div>
 <div class="section level3">
 <h3 id="id_15-multiracial-students-are-the-fastest-growing-demographic">15. Multiracial students are the fastest-growing demographic<a class="anchor" aria-label="anchor" href="#id_15-multiracial-students-are-the-fastest-growing-demographic"></a>
 </h3>
-<p>Students identifying as Two or More Races grew from 2.5% to 3.1% of enrollment between 2020 and 2024 – a 24% increase in raw numbers. While still a small share, this is the fastest percentage growth of any demographic group.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multi_trend</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"multiracial"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct_display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">multi_trend</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct_display</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [output will be generated when vignette renders]</span></span></code></pre></div>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">multi_trend</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">end_year</span>, y <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.2</span>, color <span class="op">=</span> <span class="st">"#882255"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span>, color <span class="op">=</span> <span class="st">"#882255"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span><span class="op">)</span>, vjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span>, size <span class="op">=</span> <span class="fl">3.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="va">comma</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Multiracial Students: Fastest-Growing Group"</span>,</span>
-<span>    subtitle <span class="op">=</span> <span class="st">"Two or More Races enrollment, 2020-2024"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"School Year (End)"</span>, y <span class="op">=</span> <span class="st">"Students"</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/multiracial-plot-1.png" alt="Multiracial growth"><div class="figcaption">Multiracial growth</div>
-</div>
-<p>This trend mirrors national patterns and reflects both demographic change and evolving identity choices.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">multi_trend</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multi_trend</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct_display</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   end_year n_students pct_display</span></span>
+<span><span class="co">#&gt; 1     2020     138434         2.5</span></span>
+<span><span class="co">#&gt; 2     2021     143368         2.7</span></span>
+<span><span class="co">#&gt; 3     2022     155887         2.9</span></span>
+<span><span class="co">#&gt; 4     2023     166128         3.0</span></span>
+<span><span class="co">#&gt; 5     2024     173425         3.1</span></span></code></pre></div>
+<figure><img src="https://almartin82.github.io/txschooldata/articles/district-hooks_files/figure-html/multiracial-plot-1.png" alt="Multiracial growth"><figcaption aria-hidden="true">
+Multiracial growth
+</figcaption></figure><p>From 138,434 to 173,425 – a <strong>25% increase</strong> in raw numbers. The fastest-growing demographic group in Texas.</p>
 <hr>
 </div>
 </div>
@@ -603,11 +546,11 @@
 <h2 id="graduation-rates">Graduation rates<a class="anchor" aria-label="anchor" href="#graduation-rates"></a>
 </h2>
 <p>Track four-year longitudinal graduation rates for the Class of 2003-2024:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://almartin82.github.io/txschooldata/">txschooldata</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get Class of 2024 graduation rates</span></span>
-<span><span class="va">grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fetch_grad.html">fetch_grad</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fetch_grad.html">fetch_grad</a></span><span class="op">(</span><span class="fl">2024</span>, use_cache <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># State graduation rate by subgroup</span></span>
 <span><span class="va">grad</span> <span class="op">|&gt;</span></span>
@@ -635,22 +578,14 @@
 <h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
 </h2>
 <ul>
-<li><strong><a href="https://almartin82.github.io/txschooldata/articles/district-hooks.html">Full analysis with more charts</a></strong></li>
+<li><strong><a href="https://almartin82.github.io/txschooldata/articles/district-hooks.html">Full analysis with 15 charts</a></strong></li>
 <li><strong><a href="https://almartin82.github.io/txschooldata/articles/quickstart.html">Getting started guide</a></strong></li>
 <li><strong><a href="https://almartin82.github.io/txschooldata/reference/">Function reference</a></strong></li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="data-notes">Data Notes<a class="anchor" aria-label="anchor" href="#data-notes"></a>
+<h2 id="data-availability">Data availability<a class="anchor" aria-label="anchor" href="#data-availability"></a>
 </h2>
-<div class="section level3">
-<h3 id="data-source">Data source<a class="anchor" aria-label="anchor" href="#data-source"></a>
-</h3>
-<p>All data is fetched directly from the <strong>Texas Education Agency (TEA)</strong> servers at <a href="https://rptsvr1.tea.texas.gov/" class="external-link uri">https://rptsvr1.tea.texas.gov/</a>. No manual downloads required.</p>
-</div>
-<div class="section level3">
-<h3 id="available-years">Available years<a class="anchor" aria-label="anchor" href="#available-years"></a>
-</h3>
 <p>This package pulls from three TEA reporting systems:</p>
 <table class="table">
 <thead><tr class="header">
@@ -676,50 +611,41 @@
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section level3">
-<h3 id="suppression-rules">Suppression rules<a class="anchor" aria-label="anchor" href="#suppression-rules"></a>
-</h3>
-<p>TEA suppresses enrollment counts when a subgroup has fewer than 5 students at a campus to protect student privacy. Suppressed values appear as <code>NA</code> in the data.</p>
-</div>
-<div class="section level3">
-<h3 id="known-data-quality-issues">Known data quality issues<a class="anchor" aria-label="anchor" href="#known-data-quality-issues"></a>
-</h3>
-<ul>
-<li>
-<strong>Asian/Pacific Islander:</strong> Pre-2011 data combines Asian and Pacific Islander into a single “asian” category. Separate Pacific Islander data only available from 2011 onward (federal reporting change).</li>
-<li>
-<strong>Two or More Races:</strong> Only available from 2011 onward (federal reporting change).</li>
-<li>
-<strong>Historical comparisons:</strong> Definition of “economically disadvantaged” and other categories may shift over time.</li>
-<li>
-<strong>STAAR performance levels:</strong> TEA’s performance level counts may not sum to the total tested count. Students may be counted in multiple categories depending on reporting methodology.</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="census-day">Census Day<a class="anchor" aria-label="anchor" href="#census-day"></a>
-</h3>
-<p>TEA enrollment data is based on the <strong>PEIMS Fall Snapshot</strong>, typically taken on the last Friday in October each year.</p>
-</div>
+<p>All data is fetched directly from TEA servers – no manual downloads required.</p>
 <div class="section level3">
 <h3 id="whats-included">What’s included<a class="anchor" aria-label="anchor" href="#whats-included"></a>
 </h3>
 <p><strong>Enrollment data:</strong> - <strong>Levels:</strong> State, district (~1,200), and campus (~9,000) - <strong>Demographics:</strong> White, Black, Hispanic, Asian, American Indian, Pacific Islander, Two or More Races - <strong>Special populations:</strong> Economically disadvantaged, LEP/English learners, Special education, At-risk, Gifted - <strong>Grade levels:</strong> Early Education (EE) through Grade 12, plus totals</p>
 <p><strong>Graduation rate data:</strong> - <strong>Years:</strong> Class of 2003-2024 (four-year longitudinal rates) - <strong>Levels:</strong> State, district, campus - <strong>Subgroups:</strong> All students, race/ethnicity, gender, special populations - <strong>Note:</strong> Uses federal calculation for consistency across years</p>
-<p><strong>STAAR assessment data:</strong> - <strong>Years:</strong> 2018, 2021-2023 (legacy format) - <strong>Levels:</strong> District (~1,200) and campus (~9,000) - <strong>Grades:</strong> 3-8 - <strong>Subjects:</strong> Reading/Language Arts (RLA) and Math - <strong>Performance levels:</strong> Did Not Meet, Approaches, Meets, Masters Grade Level - <strong>Note:</strong> 2019-2020 not available (COVID-19 pandemic disrupted testing)</p>
 </div>
 <div class="section level3">
-<h3 id="formatting-notes">Formatting notes<a class="anchor" aria-label="anchor" href="#formatting-notes"></a>
+<h3 id="data-notes">Data notes<a class="anchor" aria-label="anchor" href="#data-notes"></a>
 </h3>
 <ul>
 <li>
-<strong>IDs:</strong> District IDs are 6 digits (e.g., <code>101912</code> for Austin ISD). Campus IDs are 9 digits (district + 3-digit campus number).</li>
+<strong>IDs:</strong> District IDs are 6 digits (e.g., <code>101912</code> for Houston ISD). Campus IDs are 9 digits (district + 3-digit campus number).</li>
 <li>
-<strong>Tidy format:</strong> By default, <code><a href="reference/fetch_enr.html">fetch_enr()</a></code> returns long/tidy data with <code>subgroup</code>, <code>grade_level</code>, and <code>n_students</code> columns. Use <code>tidy = FALSE</code> for wide format. STAAR data works similarly with <code><a href="reference/fetch_staar.html">fetch_staar()</a></code>.</li>
+<strong>Tidy format:</strong> By default, <code><a href="reference/fetch_enr.html">fetch_enr()</a></code> returns long/tidy data with <code>subgroup</code>, <code>grade_level</code>, and <code>n_students</code> columns. Use <code>tidy = FALSE</code> for wide format.</li>
 <li>
 <strong>Percentages:</strong> The <code>pct</code> column is a proportion (0-1), not a percentage. Multiply by 100 for display.</li>
 <li>
 <strong>Caching:</strong> Data is cached locally after first download. Use <code>use_cache = FALSE</code> to force refresh.</li>
+<li>
+<strong>Suppression:</strong> TEA applies data masking to protect student privacy for small subgroups.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="caveats">Caveats<a class="anchor" aria-label="anchor" href="#caveats"></a>
+</h3>
+<ul>
+<li>
+<strong>Asian/Pacific Islander:</strong> Pre-2011 data combines Asian and Pacific Islander into a single “asian” category. Separate Pacific Islander data only available from 2011 onward (federal reporting change).</li>
+<li>
+<strong>Two or More Races:</strong> Only available from 2011 onward (federal reporting change)</li>
+<li>
+<strong>Column names:</strong> Standardized across years, but underlying TEA variable names differ between systems</li>
+<li>
+<strong>Historical comparisons:</strong> Definition of “economically disadvantaged” and other categories may shift over time</li>
 </ul>
 </div>
 </div>
