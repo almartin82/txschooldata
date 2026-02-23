@@ -110,7 +110,7 @@ enr_multi |>
 
 For one column per demographic:
 
-```{r wide}
+```{r wide, eval=FALSE}
 enr_wide <- fetch_enr(2024, tidy = FALSE, use_cache = TRUE)
 ```
 
