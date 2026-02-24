@@ -42,7 +42,7 @@ format for analysis.
 
 Texas uses a hierarchical ID system:
 
-- District IDs: 6 digits (e.g., 101912 = Houston ISD)
+- District IDs: 6 digits (e.g., 101912 = Austin ISD)
 
 - Campus IDs: 9 digits (district ID + 3-digit campus number)
 

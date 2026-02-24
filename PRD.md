@@ -71,11 +71,11 @@ Texas uses a hierarchical ID system:
 - **District IDs**: 6 digits
   - First 3 digits: County-district number
   - Last 3 digits: District within county
-  - Example: 101912 = Houston ISD (Harris County)
+  - Example: 101912 = Austin ISD (Travis County)
 - **Campus IDs**: 9 digits
   - First 6 digits: District ID
   - Last 3 digits: Campus number within district
-  - Example: 101912001 = First campus in Houston ISD
+  - Example: 101912001 = First campus in Austin ISD
 
 ### Data Scope
 
