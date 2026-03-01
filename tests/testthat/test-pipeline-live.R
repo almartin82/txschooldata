@@ -17,9 +17,12 @@
 #
 # ==============================================================================
 
-# Helper function to skip if offline
+# Helper function to skip if offline or in CI
+# TEA's SAS broker is unreliable from CI runners — returns HTML error pages,
+# truncated CSVs, or times out. These live tests are for local validation only.
 skip_if_offline <- function() {
   skip_on_cran()
+  skip_on_ci()
   tryCatch({
     response <- httr::HEAD("https://www.google.com", httr::timeout(5))
     if (httr::http_error(response)) skip("No network connectivity")
