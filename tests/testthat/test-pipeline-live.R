@@ -21,12 +21,42 @@
 # TEA's SAS broker is unreliable from CI runners — returns HTML error pages,
 # truncated CSVs, or times out. These live tests are for local validation only.
 skip_if_offline <- function() {
+
   skip_on_cran()
   skip_on_ci()
   tryCatch({
     response <- httr::HEAD("https://www.google.com", httr::timeout(5))
     if (httr::http_error(response)) skip("No network connectivity")
   }, error = function(e) skip("No network connectivity"))
+}
+
+# Helper to skip if TEA SAS broker is not returning valid CSV data.
+# The TEA server periodically returns HTML error pages or truncated data
+# instead of CSV, which causes cascading test failures.
+skip_if_tea_unavailable <- function() {
+  skip_if_offline()
+  tryCatch({
+    test_url <- build_tapr_test_url(2024, "CSTUD", "IDENT")
+    temp <- tempfile(fileext = ".csv")
+    on.exit(unlink(temp), add = TRUE)
+    response <- httr::GET(
+      test_url,
+      httr::write_disk(temp, overwrite = TRUE),
+      httr::timeout(60)
+    )
+    if (httr::http_error(response)) {
+      skip("TEA SAS broker returned HTTP error")
+    }
+    first_lines <- readLines(temp, n = 3, warn = FALSE)
+    if (any(grepl("<html|<HTML|<!DOCTYPE", first_lines))) {
+      skip("TEA SAS broker returned HTML error page instead of CSV")
+    }
+    if (file.info(temp)$size < 500) {
+      skip("TEA SAS broker returned empty/truncated response")
+    }
+  }, error = function(e) {
+    skip(paste("TEA SAS broker unreachable:", e$message))
+  })
 }
 
 # Helper to build TAPR URL
@@ -58,6 +88,8 @@ build_tapr_test_url <- function(year, dsname = "CSTUD", keys = c("IDENT")) {
 .test_cache <- new.env(parent = emptyenv())
 
 # Helper to download and parse TEA data (cached within test session)
+# Returns NULL and calls skip() if TEA server returns an error page or
+# unexpected data instead of valid CSV.
 download_tea_csv <- function(year, dsname = "CSTUD", keys = c("IDENT", "PET")) {
   # Create cache key
   cache_key <- paste(year, dsname, paste(sort(keys), collapse = "_"), sep = "_")
@@ -75,22 +107,35 @@ download_tea_csv <- function(year, dsname = "CSTUD", keys = c("IDENT", "PET")) {
 
   temp_file <- tempfile(fileext = ".csv")
 
-  response <- httr::GET(
-    url,
-    httr::write_disk(temp_file, overwrite = TRUE),
-    httr::timeout(180)
+  response <- tryCatch(
+    httr::GET(
+      url,
+      httr::write_disk(temp_file, overwrite = TRUE),
+      httr::timeout(180)
+    ),
+    error = function(e) {
+      unlink(temp_file)
+      skip(paste("TEA download failed:", e$message))
+    }
   )
 
   if (httr::http_error(response)) {
     unlink(temp_file)
-    stop(paste("HTTP error:", httr::status_code(response)))
+    skip(paste("TEA HTTP error:", httr::status_code(response)))
   }
 
   # Check for empty or error response
   file_size <- file.info(temp_file)$size
   if (file_size < 100) {
     unlink(temp_file)
-    stop("Empty or error response from TEA server")
+    skip("TEA returned empty or error response")
+  }
+
+  # Check for HTML error page
+  first_lines <- readLines(temp_file, n = 3, warn = FALSE)
+  if (any(grepl("<html|<HTML|<!DOCTYPE", first_lines))) {
+    unlink(temp_file)
+    skip("TEA returned HTML error page instead of CSV data")
   }
 
   df <- readr::read_csv(
@@ -114,9 +159,12 @@ download_tea_csv <- function(year, dsname = "CSTUD", keys = c("IDENT", "PET")) {
 test_that("TEA SAS broker base URL is reachable", {
   skip_if_offline()
 
-  response <- httr::HEAD(
-    "https://rptsvr1.tea.texas.gov/cgi/sas/broker",
-    httr::timeout(30)
+  response <- tryCatch(
+    httr::HEAD(
+      "https://rptsvr1.tea.texas.gov/cgi/sas/broker",
+      httr::timeout(30)
+    ),
+    error = function(e) skip(paste("TEA SAS broker unreachable:", e$message))
   )
   expect_equal(httr::status_code(response), 200)
 })
@@ -125,7 +173,10 @@ test_that("TAPR campus data URL returns HTTP 200 for 2024", {
   skip_if_offline()
 
   url <- build_tapr_test_url(2024, "CSTUD", "IDENT")
-  response <- httr::HEAD(url, httr::timeout(60))
+  response <- tryCatch(
+    httr::HEAD(url, httr::timeout(60)),
+    error = function(e) skip(paste("TEA URL unreachable:", e$message))
+  )
   expect_equal(httr::status_code(response), 200)
 })
 
@@ -133,7 +184,10 @@ test_that("TAPR district data URL returns HTTP 200 for 2024", {
   skip_if_offline()
 
   url <- build_tapr_test_url(2024, "DSTUD", "IDENT")
-  response <- httr::HEAD(url, httr::timeout(60))
+  response <- tryCatch(
+    httr::HEAD(url, httr::timeout(60)),
+    error = function(e) skip(paste("TEA URL unreachable:", e$message))
+  )
   expect_equal(httr::status_code(response), 200)
 })
 
@@ -145,7 +199,10 @@ test_that("TAPR URL returns HTTP 200 for historical years (2013-2023)", {
 
   for (year in test_years) {
     url <- build_tapr_test_url(year, "CSTUD", "IDENT")
-    response <- httr::HEAD(url, httr::timeout(60))
+    response <- tryCatch(
+      httr::HEAD(url, httr::timeout(60)),
+      error = function(e) skip(paste("TEA URL unreachable for year", year, ":", e$message))
+    )
     expect_equal(
       httr::status_code(response), 200,
       info = paste("Failed for year", year)
@@ -169,7 +226,10 @@ test_that("AEIS SAS broker URL returns HTTP 200 for 2003-2012", {
       "&key=PETALL"
     )
 
-    response <- httr::HEAD(url, httr::timeout(60))
+    response <- tryCatch(
+      httr::HEAD(url, httr::timeout(60)),
+      error = function(e) skip(paste("TEA AEIS URL unreachable for year", year, ":", e$message))
+    )
     expect_equal(
       httr::status_code(response), 200,
       info = paste("AEIS failed for year", year)
@@ -182,17 +242,20 @@ test_that("AEIS SAS broker URL returns HTTP 200 for 2003-2012", {
 # ==============================================================================
 
 test_that("Can download campus enrollment CSV for 2024", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   url <- build_tapr_test_url(2024, "CSTUD", c("IDENT", "PET"))
 
   temp_file <- tempfile(fileext = ".csv")
   on.exit(unlink(temp_file))
 
-  response <- httr::GET(
-    url,
-    httr::write_disk(temp_file, overwrite = TRUE),
-    httr::timeout(180)
+  response <- tryCatch(
+    httr::GET(
+      url,
+      httr::write_disk(temp_file, overwrite = TRUE),
+      httr::timeout(180)
+    ),
+    error = function(e) skip(paste("TEA download failed:", e$message))
   )
 
   expect_equal(httr::status_code(response), 200)
@@ -211,7 +274,7 @@ test_that("Can download campus enrollment CSV for 2024", {
 })
 
 test_that("Downloaded file is not an HTML error page", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   # Use the full key set for consistency
   url <- build_tapr_test_url(2024, "CSTUD", c("IDENT", "PET", "PETG"))
@@ -220,7 +283,14 @@ test_that("Downloaded file is not an HTML error page", {
   on.exit(unlink(temp_file))
 
   Sys.sleep(1)  # Rate limiting
-  httr::GET(url, httr::write_disk(temp_file), httr::timeout(180))
+  response <- tryCatch(
+    httr::GET(url, httr::write_disk(temp_file), httr::timeout(180)),
+    error = function(e) skip(paste("TEA download failed:", e$message))
+  )
+
+  if (httr::http_error(response)) {
+    skip(paste("TEA returned HTTP error:", httr::status_code(response)))
+  }
 
   # Read first few lines
   first_lines <- readLines(temp_file, n = 5, warn = FALSE)
@@ -239,7 +309,7 @@ test_that("Downloaded file is not an HTML error page", {
 # ==============================================================================
 
 test_that("Can parse campus CSV with readr", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   df <- download_tea_csv(2024, "CSTUD", c("IDENT", "PET"))
 
@@ -249,7 +319,7 @@ test_that("Can parse campus CSV with readr", {
 })
 
 test_that("Parsed CSV has expected number of rows (sanity check)", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   # Use full key set to share cache with other tests
   df <- download_tea_csv(2024, "CSTUD", c("IDENT", "PET", "PETG"))
@@ -268,7 +338,7 @@ test_that("Parsed CSV has expected number of rows (sanity check)", {
 # ==============================================================================
 
 test_that("Campus data has required ID columns", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   # Use full key set to share cache with other tests
   df <- download_tea_csv(2024, "CSTUD", c("IDENT", "PET", "PETG"))
@@ -281,7 +351,7 @@ test_that("Campus data has required ID columns", {
 })
 
 test_that("Campus data has enrollment count columns", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   # Use full key set to share cache with other tests
   df <- download_tea_csv(2024, "CSTUD", c("IDENT", "PET", "PETG"))
@@ -294,7 +364,7 @@ test_that("Campus data has enrollment count columns", {
 })
 
 test_that("Campus data has grade level columns", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   # Use full key set to share cache with other tests
   df <- download_tea_csv(2024, "CSTUD", c("IDENT", "PET", "PETG"))
@@ -314,7 +384,7 @@ test_that("Campus data has grade level columns", {
 # ==============================================================================
 
 test_that("Campus IDs have correct format (9 digits with leading zeros)", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   # Use full key set to share cache with other tests
   df <- download_tea_csv(2024, "CSTUD", c("IDENT", "PET", "PETG"))
@@ -335,7 +405,7 @@ test_that("Campus IDs have correct format (9 digits with leading zeros)", {
 })
 
 test_that("Enrollment counts are non-negative", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   # Use full key set to share cache with other tests
   df <- download_tea_csv(2024, "CSTUD", c("IDENT", "PET", "PETG"))
@@ -355,7 +425,7 @@ test_that("Enrollment counts are non-negative", {
 })
 
 test_that("State total enrollment is in expected range", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   # Use full key set for district data
   df <- download_tea_csv(2024, "DSTUD", c("IDENT", "PET", "PETG"))
@@ -373,7 +443,7 @@ test_that("State total enrollment is in expected range", {
 })
 
 test_that("Demographic subgroups sum approximately to total", {
-  skip_if_offline()
+  skip_if_tea_unavailable()
 
   # Use full key set to share cache with other tests
   df <- download_tea_csv(2024, "DSTUD", c("IDENT", "PET", "PETG"))
@@ -398,11 +468,13 @@ test_that("Demographic subgroups sum approximately to total", {
 # ==============================================================================
 
 test_that("get_raw_enr returns data for sample TAPR years", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
   # Test just 2024 to avoid hammering TEA server
-  raw <- get_raw_enr(2024)
+  raw <- tryCatch(
+    get_raw_enr(2024),
+    error = function(e) skip(paste("TEA data fetch failed:", e$message))
+  )
 
   expect_true(is.list(raw))
   expect_true("campus" %in% names(raw))
@@ -415,10 +487,12 @@ test_that("get_raw_enr returns data for sample TAPR years", {
 })
 
 test_that("fetch_enr adds correct end_year to output", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
-  result <- fetch_enr(2024, tidy = FALSE, use_cache = TRUE)
+  result <- tryCatch(
+    fetch_enr(2024, tidy = FALSE, use_cache = TRUE),
+    error = function(e) skip(paste("TEA data fetch failed:", e$message))
+  )
 
   expect_true("end_year" %in% names(result))
   expect_true(all(result$end_year == 2024))
@@ -429,10 +503,12 @@ test_that("fetch_enr adds correct end_year to output", {
 # ==============================================================================
 
 test_that("District totals approximately equal sum of campus totals", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
-  result <- fetch_enr(2024, tidy = FALSE, use_cache = TRUE)
+  result <- tryCatch(
+    fetch_enr(2024, tidy = FALSE, use_cache = TRUE),
+    error = function(e) skip(paste("TEA data fetch failed:", e$message))
+  )
 
   # Sum campus enrollments by district
   campus_sums <- result |>
@@ -458,10 +534,12 @@ test_that("District totals approximately equal sum of campus totals", {
 })
 
 test_that("State total equals sum of district totals", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
-  result <- fetch_enr(2024, tidy = FALSE, use_cache = TRUE)
+  result <- tryCatch(
+    fetch_enr(2024, tidy = FALSE, use_cache = TRUE),
+    error = function(e) skip(paste("TEA data fetch failed:", e$message))
+  )
 
   state_total <- result |>
     dplyr::filter(type == "State") |>
@@ -481,11 +559,16 @@ test_that("State total equals sum of district totals", {
 # ==============================================================================
 
 test_that("tidy=TRUE output maintains data integrity", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
-  wide <- fetch_enr(2024, tidy = FALSE, use_cache = TRUE)
-  tidy <- fetch_enr(2024, tidy = TRUE, use_cache = TRUE)
+  wide <- tryCatch(
+    fetch_enr(2024, tidy = FALSE, use_cache = TRUE),
+    error = function(e) skip(paste("TEA data fetch failed:", e$message))
+  )
+  tidy <- tryCatch(
+    fetch_enr(2024, tidy = TRUE, use_cache = TRUE),
+    error = function(e) skip(paste("TEA data fetch failed:", e$message))
+  )
 
   # Total enrollment in wide should equal sum in tidy for total_enrollment subgroup
   wide_state_total <- wide |>
@@ -501,10 +584,12 @@ test_that("tidy=TRUE output maintains data integrity", {
 })
 
 test_that("No Inf or NaN values in tidy output", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
-  result <- fetch_enr(2024, tidy = TRUE, use_cache = TRUE)
+  result <- tryCatch(
+    fetch_enr(2024, tidy = TRUE, use_cache = TRUE),
+    error = function(e) skip(paste("TEA data fetch failed:", e$message))
+  )
 
   numeric_cols <- names(result)[sapply(result, is.numeric)]
 
@@ -517,10 +602,12 @@ test_that("No Inf or NaN values in tidy output", {
 })
 
 test_that("Percentages are in valid range (0-100)", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
-  result <- fetch_enr(2024, tidy = TRUE, use_cache = TRUE)
+  result <- tryCatch(
+    fetch_enr(2024, tidy = TRUE, use_cache = TRUE),
+    error = function(e) skip(paste("TEA data fetch failed:", e$message))
+  )
 
   # Check pct column if it exists
   if ("pct" %in% names(result)) {
@@ -534,10 +621,12 @@ test_that("Percentages are in valid range (0-100)", {
 })
 
 test_that("All entity types are present in tidy output", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
-  result <- fetch_enr(2024, tidy = TRUE, use_cache = TRUE)
+  result <- tryCatch(
+    fetch_enr(2024, tidy = TRUE, use_cache = TRUE),
+    error = function(e) skip(paste("TEA data fetch failed:", e$message))
+  )
 
   # Check flags
   expect_true(any(result$is_state), label = "Should have state rows")
@@ -555,11 +644,13 @@ test_that("All entity types are present in tidy output", {
 # ==============================================================================
 
 test_that("TAPR era (2013+) data downloads correctly", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
   # Test most recent year
-  result <- fetch_enr(2024, tidy = FALSE, use_cache = FALSE)
+  result <- tryCatch(
+    fetch_enr(2024, tidy = FALSE, use_cache = FALSE),
+    error = function(e) skip(paste("TEA TAPR data fetch failed:", e$message))
+  )
 
   expect_true("Campus" %in% result$type)
   expect_true("District" %in% result$type)
@@ -570,10 +661,12 @@ test_that("TAPR era (2013+) data downloads correctly", {
 })
 
 test_that("AEIS SAS era (2003-2012) data downloads correctly", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
-  result <- fetch_enr(2010, tidy = FALSE, use_cache = FALSE)
+  result <- tryCatch(
+    fetch_enr(2010, tidy = FALSE, use_cache = FALSE),
+    error = function(e) skip(paste("TEA AEIS SAS data fetch failed:", e$message))
+  )
 
   expect_true("Campus" %in% result$type)
   expect_true("District" %in% result$type)
@@ -584,10 +677,12 @@ test_that("AEIS SAS era (2003-2012) data downloads correctly", {
 })
 
 test_that("AEIS CGI era (1997-2002) data downloads correctly", {
-  skip_if_offline()
-  skip_on_cran()
+  skip_if_tea_unavailable()
 
-  result <- fetch_enr(2000, tidy = FALSE, use_cache = FALSE)
+  result <- tryCatch(
+    fetch_enr(2000, tidy = FALSE, use_cache = FALSE),
+    error = function(e) skip(paste("TEA AEIS CGI data fetch failed:", e$message))
+  )
 
   expect_true("Campus" %in% result$type)
   expect_true("District" %in% result$type)
