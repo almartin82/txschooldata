@@ -24,6 +24,7 @@ Imports:
     rappdirs
 Suggests:
     testthat (>= 3.0.0),
+    curl,
     knitr,
     rmarkdown,
     ggplot2,
