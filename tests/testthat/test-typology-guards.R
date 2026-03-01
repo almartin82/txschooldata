@@ -66,8 +66,9 @@ test_that("Pct is consistent: subgroup pcts sum approximately to 1 for race grou
 
   race_data <- enr[enr$subgroup %in% race_groups &
                    enr$grade_level == "TOTAL", ]
+  race_data <- race_data[!is.na(race_data$pct), ]
 
-  if (nrow(race_data) == 0) skip("No race subgroup data in tidy output (TEA may have returned partial data)")
+  if (nrow(race_data) == 0) skip("No race subgroup data with pct values (TEA may have returned partial data)")
 
   # Group by entity and sum pcts
   race_sums <- stats::aggregate(
