@@ -71,11 +71,13 @@ test_that("Pct is consistent: subgroup pcts sum approximately to 1 for race grou
   if (nrow(race_data) == 0) skip("No race subgroup data with pct values (TEA may have returned partial data)")
 
   # Group by entity and sum pcts
+  # na.action = na.pass keeps rows where campus_id is NA (state/district rows)
   race_sums <- stats::aggregate(
     pct ~ end_year + type + district_id + campus_id,
     data = race_data,
     FUN = sum,
-    na.rm = TRUE
+    na.rm = TRUE,
+    na.action = na.pass
   )
 
   # Filter to rows where sum is meaningful (has all groups)
