@@ -165,9 +165,10 @@ process_campus_enr <- function(df, end_year) {
   }
 
   # Special populations
+  # Note: dd_tapr (2024+) uses CPNTECOC/CPNTLEPC instead of CPETECOC/CPETLEPC
   special_map <- list(
-    econ_disadv = c("CPETECOC", "PETECOC"),
-    lep = c("CPETLEPC", "PETLEPC"),
+    econ_disadv = c("CPETECOC", "CPNTECOC", "PETECOC"),
+    lep = c("CPETLEPC", "CPNTLEPC", "PETLEPC"),
     special_ed = c("CPETSPEC", "PETSPEC")
   )
 
@@ -202,6 +203,14 @@ process_campus_enr <- function(df, end_year) {
     if (!is.null(col)) {
       result[[name]] <- safe_numeric(df[[col]])
     }
+  }
+
+  if (!"row_total" %in% names(result)) {
+    stop(
+      "No enrollment data columns found for year ", end_year, ". ",
+      "TEA may not have published data for this year yet. ",
+      "Check https://rptsvr1.tea.texas.gov/perfreport/tapr/index.html"
+    )
   }
 
   result
@@ -296,9 +305,10 @@ process_district_enr <- function(df, end_year) {
   }
 
   # Special populations
+  # Note: dd_tapr (2024+) uses DPNTECOC/DPNTLEPC instead of DPETECOC/DPETLEPC
   special_map <- list(
-    econ_disadv = c("DPETECOC", "PETECOC"),
-    lep = c("DPETLEPC", "PETLEPC"),
+    econ_disadv = c("DPETECOC", "DPNTECOC", "PETECOC"),
+    lep = c("DPETLEPC", "DPNTLEPC", "PETLEPC"),
     special_ed = c("DPETSPEC", "PETSPEC")
   )
 
@@ -333,6 +343,14 @@ process_district_enr <- function(df, end_year) {
     if (!is.null(col)) {
       result[[name]] <- safe_numeric(df[[col]])
     }
+  }
+
+  if (!"row_total" %in% names(result)) {
+    stop(
+      "No enrollment data columns found for year ", end_year, ". ",
+      "TEA may not have published data for this year yet. ",
+      "Check https://rptsvr1.tea.texas.gov/perfreport/tapr/index.html"
+    )
   }
 
   result

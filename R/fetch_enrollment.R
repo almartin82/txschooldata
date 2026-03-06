@@ -54,6 +54,15 @@ fetch_enr <- function(end_year, tidy = TRUE, use_cache = TRUE) {
     return(read_cache(end_year, cache_type))
   }
 
+  # For TAPR years where old API is dead (2013-2023), use bundled data
+  if (end_year >= 2013 && end_year <= 2023) {
+    result <- read_bundled_enr(end_year, cache_type)
+    if (use_cache) {
+      write_cache(result, end_year, cache_type)
+    }
+    return(result)
+  }
+
   # Get raw data from TEA
   raw <- get_raw_enr(end_year)
 
@@ -114,4 +123,46 @@ fetch_enr_multi <- function(end_years, tidy = TRUE, use_cache = TRUE) {
 
   # Combine
   dplyr::bind_rows(results)
+}
+
+
+#' Read bundled enrollment data from inst/extdata
+#'
+#' For years where TEA's old xplore API is dead (2013-2023), reads
+#' pre-processed data bundled with the package.
+#'
+#' @param end_year School year end (2013-2023)
+#' @param type Data type: "tidy" or "wide"
+#' @return Data frame with enrollment data
+#' @keywords internal
+read_bundled_enr <- function(end_year, type) {
+
+  filename <- paste0("enr_", type, "_", end_year, ".rds")
+  filepath <- system.file("extdata", filename, package = "txschooldata")
+
+  if (filepath == "") {
+    # Check if the other format exists
+    other_type <- if (type == "wide") "tidy" else "wide"
+    other_file <- system.file(
+      "extdata",
+      paste0("enr_", other_type, "_", end_year, ".rds"),
+      package = "txschooldata"
+    )
+
+    if (other_file != "") {
+      stop(
+        "Bundled ", type, " format data is not available for ", end_year, ".\n",
+        "The ", other_type, " format is available. Try: fetch_enr(", end_year,
+        ", tidy = ", toupper(other_type == "tidy"), ")"
+      )
+    }
+
+    stop(
+      "No bundled data available for year ", end_year, ".\n",
+      "TEA's old download API has been decommissioned for this year."
+    )
+  }
+
+  message(paste("Reading bundled data for", end_year))
+  readRDS(filepath)
 }
