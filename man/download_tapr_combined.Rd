@@ -7,7 +7,7 @@
 download_tapr_combined(end_year, sumlev)
 }
 \arguments{
-\item{end_year}{School year end}
+\item{end_year}{School year end (2024+)}
 
 \item{sumlev}{Summary level: "C" for campus, "D" for district}
 }
@@ -15,8 +15,8 @@ download_tapr_combined(end_year, sumlev)
 Data frame
 }
 \description{
-Downloads data from TEA's TAPR system using GET requests to the SAS broker.
-This function retrieves both reference (ID, name) and student (enrollment)
-data in a single request.
+Downloads data from TEA's TAPR Data Download (dd_tapr) system using POST
+requests. This replaced the old xplore/getdata.sas system which was
+decommissioned by TEA.
 }
 \keyword{internal}

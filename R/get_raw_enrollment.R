@@ -25,7 +25,7 @@
 #' Downloads campus and district enrollment data from TEA's reporting systems.
 #' Uses TAPR for 2013+, AEIS SAS broker for 2003-2012, and AEIS CGI for 1997-2002.
 #'
-#' @param end_year School year end (2023-24 = 2024)
+#' @param end_year School year end (e.g., 2023-24 = 2024). Valid range: 1997-2025.
 #' @return List with campus and district data frames
 #' @keywords internal
 get_raw_enr <- function(end_year) {
@@ -416,112 +416,144 @@ parse_aeis_layout <- function(layout_text) {
 
 #' Download combined TAPR reference and student data
 #'
-#' Downloads data from TEA's TAPR system using GET requests to the SAS broker.
-#' This function retrieves both reference (ID, name) and student (enrollment)
-#' data in a single request.
+#' Downloads data from TEA's TAPR Data Download (dd_tapr) system using POST
+#' requests. This replaced the old xplore/getdata.sas system which was
+#' decommissioned by TEA.
 #'
-#' @param end_year School year end
+#' @param end_year School year end (2024+)
 #' @param sumlev Summary level: "C" for campus, "D" for district
 #' @return Data frame
 #' @keywords internal
 download_tapr_combined <- function(end_year, sumlev) {
 
-  # Determine dataset name and select appropriate keys
+  base_url <- "https://rptsvr1.tea.texas.gov/cgi/sas/broker"
+  prgopt <- "reports/tapr/dd/dd_tapr_step_7.sas"
+
+  # Keys for enrollment data: demographics, special pops, grades
+  stud_keys <- c(
+    "ETALL", "NTALL",
+    "ETBLAC", "ETHISC", "ETWHIC", "ETASIC", "ETPCIC", "ETINDC", "ETTWOC",
+    "NTECO", "NTLEP", "ETSPE",
+    "ETGEEC", "ETGPKC", "ETGKNC",
+    "ETG01C", "ETG02C", "ETG03C", "ETG04C", "ETG05C", "ETG06C",
+    "ETG07C", "ETG08C", "ETG09C", "ETG10C", "ETG11C", "ETG12C"
+  )
+  ref_keys <- c("IDENT", "FLCHART", "NTYNAM", "EGION")
+
   if (sumlev == "C") {
-    dsname <- "CSTUD"
-    # IDENT = Campus/District ID and names
-    # PET = Student Membership Counts/Percents (demographics)
-    # PETG = Student Membership by Grade
-    keys <- c("IDENT", "PET", "PETG")
-    id_param <- "camp0=999999"  # 6 digits for "all campuses"
+    level <- "Campus"
+    tapr <- "all_c"
   } else {
-    dsname <- "DSTUD"
-    keys <- c("IDENT", "PET", "PETG")
-    id_param <- "dist0=999999"
+    level <- "District"
+    tapr <- "all_d"
   }
 
-  # Determine program path based on year
-  # 2024+: Uses "Basic Download" folder structure
-  # 2013-2023: Uses simpler path
-  if (end_year >= 2024) {
-    prgopt <- paste0(end_year, "/tapr/Basic%20Download/xplore/getdata.sas")
+  # Download student enrollment data (STUD)
+  stud_body <- build_dd_tapr_body(end_year, prgopt, level, tapr, sumlev, "STUD", stud_keys)
+  stud_df <- post_dd_tapr(base_url, stud_body, paste0(level, " STUD"), end_year)
+
+  # Download reference data (REF)
+  ref_body <- build_dd_tapr_body(end_year, prgopt, level, tapr, sumlev, "REF", ref_keys)
+  ref_df <- post_dd_tapr(base_url, ref_body, paste0(level, " REF"), end_year)
+
+  # Merge STUD + REF by ID column
+  id_col <- if (sumlev == "C") "CAMPUS" else "DISTRICT"
+
+  if (id_col %in% names(stud_df) && id_col %in% names(ref_df)) {
+    # Remove duplicate columns from ref before joining
+    ref_only_cols <- setdiff(names(ref_df), names(stud_df))
+    ref_for_join <- ref_df[, c(id_col, ref_only_cols), drop = FALSE]
+    df <- dplyr::left_join(stud_df, ref_for_join, by = id_col)
   } else {
-    prgopt <- paste0(end_year, "/xplore/getdata.sas")
+    df <- stud_df
   }
 
-  # Build the URL with query parameters
-  # TEA's SAS broker requires multiple key parameters for column selection
-  base_url <- paste0("https://rptsvr1.tea.texas.gov/cgi/sas/broker/", dsname)
+  df
+}
+
+
+#' Build POST body for dd_tapr request
+#'
+#' @param end_year School year end
+#' @param prgopt SAS program path
+#' @param level "Campus" or "District"
+#' @param tapr "all_c" or "all_d"
+#' @param sumlev "C" or "D"
+#' @param dsname "STUD" or "REF"
+#' @param keys Character vector of key codes
+#' @return URL-encoded body string
+#' @keywords internal
+build_dd_tapr_body <- function(end_year, prgopt, level, tapr, sumlev, dsname, keys) {
+
   key_params <- paste0("key=", keys, collapse = "&")
 
-  url <- paste0(
-    base_url, "?",
+  paste0(
     "_service=marykay",
-    "&year4=", end_year,
-    "&prgopt=", prgopt,
     "&_program=perfrept.perfmast.sas",
+    "&prgopt=", prgopt,
+    "&ccyy=", end_year,
+    "&level=", level,
+    "&tapr=", tapr,
     "&dsname=", dsname,
     "&sumlev=", sumlev,
+    "&id=",
     "&_debug=0",
-    "&format=CSV",
-    "&", id_param,
-    "&_saveas=", dsname,
-    "&datafmt=C",  # CSV format
     "&", key_params
   )
+}
 
-  # Create temp file for download
+
+#' POST to dd_tapr endpoint and parse TSV response
+#'
+#' @param url Base broker URL
+#' @param body URL-encoded POST body
+#' @param label Label for error messages
+#' @param end_year School year end (for error messages)
+#' @return Data frame
+#' @keywords internal
+post_dd_tapr <- function(url, body, label, end_year) {
+
   tname <- tempfile(
-    pattern = paste0("tea_", tolower(dsname), "_"),
+    pattern = paste0("tea_dd_tapr_"),
     tmpdir = tempdir(),
-    fileext = ".csv"
+    fileext = ".tsv"
   )
 
-  # Download using httr
   tryCatch({
-    response <- httr::GET(
+    response <- httr::POST(
       url,
+      body = body,
+      encode = "raw",
+      httr::content_type("application/x-www-form-urlencoded"),
       httr::write_disk(tname, overwrite = TRUE),
       httr::timeout(300)
     )
 
-    # Check for HTTP errors
     if (httr::http_error(response)) {
       stop(paste("HTTP error:", httr::status_code(response)))
     }
 
-    # Check content type - should be CSV
-    content_type <- httr::headers(response)$`content-type`
-    if (!is.null(content_type) && !grepl("comma-separated|csv|text", content_type, ignore.case = TRUE)) {
-      # May have received HTML error page
-      first_lines <- readLines(tname, n = 3, warn = FALSE)
-      if (any(grepl("^<html|^<HTML|^<!DOCTYPE|error", first_lines, ignore.case = TRUE))) {
-        stop(paste("Received error page instead of CSV data for", dsname, "year", end_year))
-      }
-    }
-
-    # Check file size (small files likely error pages)
-    file_info <- file.info(tname)
-    if (file_info$size < 500) {
-      content <- readLines(tname, n = 10, warn = FALSE)
-      if (any(grepl("error|not found|404|completed with errors", content, ignore.case = TRUE))) {
-        stop(paste("SAS broker returned an error. Data may not be available for year", end_year))
-      }
+    # Check for error page
+    first_lines <- readLines(tname, n = 5, warn = FALSE)
+    if (any(grepl("Please return to TEA|error|<!DOCTYPE", first_lines, ignore.case = TRUE))) {
+      stop(paste("TEA returned error page for", label, "year", end_year))
     }
 
   }, error = function(e) {
-    stop(paste("Failed to download", dsname, "data for year", end_year,
+    stop(paste("Failed to download", label, "data for year", end_year,
                "\nError:", e$message))
   })
 
-  # Read the CSV file
-  df <- readr::read_csv(
+  # dd_tapr returns TSV with two header rows:
+  # Row 1: human-readable labels (skip)
+  # Row 2: column codes (use as names)
+  df <- readr::read_tsv(
     tname,
+    skip = 1,
     col_types = readr::cols(.default = readr::col_character()),
     show_col_types = FALSE
   )
 
-  # Clean up temp file
   unlink(tname)
 
   df
@@ -561,8 +593,9 @@ get_tapr_column_map <- function() {
     multiracial = c("CPETTWOC", "DPETTWOC"),
 
     # Special populations
-    econ_disadv = c("CPETECOC", "DPETECOC"),
-    lep = c("CPETLEPC", "DPETLEPC"),
+    # Note: dd_tapr (2024+) uses NT-prefix names for econ_disadv and LEP
+    econ_disadv = c("CPETECOC", "DPETECOC", "CPNTECOC", "DPNTECOC"),
+    lep = c("CPETLEPC", "DPETLEPC", "CPNTLEPC", "DPNTLEPC"),
     special_ed = c("CPETSPEC", "DPETSPEC"),
 
     # Grade levels - Note: column names use PETG prefix
