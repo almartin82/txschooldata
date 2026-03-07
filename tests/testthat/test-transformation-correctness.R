@@ -669,10 +669,10 @@ test_that("Houston ISD totals are in plausible range across years", {
 
 test_that("fetch_enr validates year parameter boundaries", {
   expect_error(fetch_enr(1996), "end_year must be between")
-  expect_error(fetch_enr(2026), "end_year must be between")
+  expect_error(fetch_enr(2027), "end_year must be between")
 })
 
 test_that("fetch_enr_multi validates year parameter boundaries", {
   expect_error(fetch_enr_multi(c(1996, 2024)), "Invalid years")
-  expect_error(fetch_enr_multi(c(2024, 2026)), "Invalid years")
+  expect_error(fetch_enr_multi(c(2024, 2027)), "Invalid years")
 })

@@ -25,16 +25,16 @@
 #' Downloads campus and district enrollment data from TEA's reporting systems.
 #' Uses TAPR for 2013+, AEIS SAS broker for 2003-2012, and AEIS CGI for 1997-2002.
 #'
-#' @param end_year School year end (e.g., 2023-24 = 2024). Valid range: 1997-2025.
+#' @param end_year School year end (e.g., 2023-24 = 2024). Valid range: 1997-2026.
 #' @return List with campus and district data frames
 #' @keywords internal
 get_raw_enr <- function(end_year) {
 
   # Validate year
-  # AEIS CGI: 1997-2002, AEIS SAS: 2003-2012, TAPR: 2013-2025
+  # AEIS CGI: 1997-2002, AEIS SAS: 2003-2012, TAPR: 2013-2026
 
-  if (end_year < 1997 || end_year > 2025) {
-    stop("end_year must be between 1997 and 2025")
+  if (end_year < 1997 || end_year > 2026) {
+    stop("end_year must be between 1997 and 2026")
   }
 
   message(paste("Downloading TEA enrollment data for", end_year, "..."))
@@ -48,13 +48,17 @@ get_raw_enr <- function(end_year) {
     # AEIS SAS broker (2003-2012)
     campus_data <- download_aeis_data(end_year, "C")
     district_data <- download_aeis_data(end_year, "D")
-  } else {
-    # TAPR system (2013+)
+  } else if (end_year <= 2025) {
+    # TAPR system (2013-2025)
     message("  Downloading campus data...")
     campus_data <- download_tapr_combined(end_year, "C")
 
     message("  Downloading district data...")
     district_data <- download_tapr_combined(end_year, "D")
+  } else {
+    # Ad-hoc enrollment system (2026+, before TAPR publishes)
+    campus_data <- download_adhoc_enrollment(end_year, "C")
+    district_data <- download_adhoc_enrollment(end_year, "D")
   }
 
   # Add end_year column
@@ -557,6 +561,286 @@ post_dd_tapr <- function(url, body, label, end_year) {
   unlink(tname)
 
   df
+}
+
+
+#' Download enrollment data from TEA's ad-hoc reporting system
+#'
+#' For years where TAPR data isn't available yet, TEA's ad-hoc Student
+#' Enrollment Reports provide ethnicity and grade breakdowns. This function
+#' downloads ethnicity and grade data separately, pivots to wide format,
+#' and merges into a single data frame matching the TAPR column structure.
+#'
+#' Note: The ad-hoc system does NOT provide special population data
+#' (economically disadvantaged, LEP, special education). Those columns
+#' will be NA for years using this download path.
+#'
+#' @param end_year School year end (e.g., 2026 for 2025-26)
+#' @param sumlev Summary level: "C" for campus, "D" for district
+#' @return Data frame with columns matching TAPR wide format
+#' @keywords internal
+download_adhoc_enrollment <- function(end_year, sumlev) {
+
+  # Two-digit year code used by the ad-hoc system
+  year_code <- end_year %% 100
+
+  if (sumlev == "C") {
+    selsumm <- "sc"
+    level_label <- "campus"
+  } else {
+    selsumm <- "sd"
+    level_label <- "district"
+  }
+
+  message(paste0("  Downloading ", level_label, " data (ad-hoc system)..."))
+
+  # Download ethnicity data
+  message("    Fetching ethnicity breakdown...")
+  eth_df <- download_adhoc_file(year_code, selsumm, "e ")
+
+  # Download grade data
+  message("    Fetching grade breakdown...")
+  grade_df <- download_adhoc_file(year_code, selsumm, "g ")
+
+  # Pivot ethnicity data to wide format
+  eth_wide <- pivot_adhoc_ethnicity(eth_df, sumlev)
+
+  # Pivot grade data to wide format
+  grade_wide <- pivot_adhoc_grades(grade_df, sumlev)
+
+  # Merge ethnicity and grade data by ID
+  id_col <- if (sumlev == "C") "CAMPUS" else "DISTRICT"
+
+  if (id_col %in% names(eth_wide) && id_col %in% names(grade_wide)) {
+    # Remove duplicate columns from grade_wide before joining
+    grade_only_cols <- setdiff(names(grade_wide), names(eth_wide))
+    grade_for_join <- grade_wide[, c(id_col, grade_only_cols), drop = FALSE]
+    df <- dplyr::left_join(eth_wide, grade_for_join, by = id_col)
+  } else {
+    df <- eth_wide
+  }
+
+  df
+}
+
+
+#' Download a single ad-hoc enrollment file from TEA
+#'
+#' @param year_code Two-digit year code (e.g., 26 for 2025-26)
+#' @param selsumm Report type (e.g., "sc" for statewide campus)
+#' @param grouping Grouping variable code (e.g., "e " for ethnicity)
+#' @return Data frame parsed from CSV response
+#' @keywords internal
+download_adhoc_file <- function(year_code, selsumm, grouping) {
+
+  url <- paste0(
+    "https://rptsvr1.tea.texas.gov/cgi/sas/broker?",
+    "_service=marykay",
+    "&_program=adhoc.addispatch.sas",
+    "&major=st&minor=e",
+    "&endyear=", year_code,
+    "&selsumm=", selsumm,
+    "&format=C",
+    "&charsln=120&linespg=60",
+    "&loop=1&countykey=&oldnew=new",
+    "&_debug=0&key=",
+    "&grouping=", utils::URLencode(grouping, reserved = TRUE)
+  )
+
+  tname <- tempfile(
+    pattern = "tea_adhoc_",
+    tmpdir = tempdir(),
+    fileext = ".csv"
+  )
+
+  tryCatch({
+    response <- httr::GET(
+      url,
+      httr::write_disk(tname, overwrite = TRUE),
+      httr::timeout(300)
+    )
+
+    if (httr::http_error(response)) {
+      stop(paste("HTTP error:", httr::status_code(response)))
+    }
+
+    # Check for error page
+    first_lines <- readLines(tname, n = 5, warn = FALSE)
+    if (any(grepl("<!DOCTYPE|<html|error", first_lines, ignore.case = TRUE))) {
+      stop("TEA returned an error page")
+    }
+
+  }, error = function(e) {
+    stop(paste("Failed to download ad-hoc enrollment data:",
+               "\nError:", e$message))
+  })
+
+  # Read file content and find the CSV header line
+  all_lines <- readLines(tname, warn = FALSE)
+  unlink(tname)
+
+  header_idx <- grep("^\"YEAR\"", all_lines)
+  if (length(header_idx) == 0) {
+    stop("Could not find CSV header in ad-hoc response")
+  }
+
+  csv_text <- paste(all_lines[header_idx:length(all_lines)], collapse = "\n")
+
+  readr::read_csv(
+    I(csv_text),
+    col_types = readr::cols(.default = readr::col_character()),
+    show_col_types = FALSE
+  )
+}
+
+
+#' Pivot ad-hoc ethnicity data to wide format matching TAPR columns
+#'
+#' @param df Long-format data frame from ad-hoc ethnicity download
+#' @param sumlev "C" for campus, "D" for district
+#' @return Wide data frame with TAPR-compatible column names
+#' @keywords internal
+pivot_adhoc_ethnicity <- function(df, sumlev) {
+
+  prefix <- sumlev  # "C" or "D"
+  id_col <- if (sumlev == "C") "CAMPUS" else "DISTRICT"
+
+  # Map ad-hoc ethnicity names to TAPR column suffixes
+  eth_map <- c(
+    "Asian" = paste0(prefix, "PETASIC"),
+    "Black or African American" = paste0(prefix, "PETBLAC"),
+    "Hispanic/Latino" = paste0(prefix, "PETHISC"),
+    "White" = paste0(prefix, "PETWHIC"),
+    "American Indian or Alaska Nat" = paste0(prefix, "PETINDC"),
+    "Native Hawaiian/Other Pacific" = paste0(prefix, "PETPCIC"),
+    "Two or more races" = paste0(prefix, "PETTWOC")
+  )
+
+  # Clean enrollment values (handle suppression markers like "<10")
+  df$ENROLLMENT_NUM <- suppressWarnings(as.numeric(
+    gsub("[^0-9.-]", "", df$ENROLLMENT)
+  ))
+
+  # Compute total per entity by summing ethnic groups
+  # (handles suppressed values by using na.rm)
+  totals <- df |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(id_col))) |>
+    dplyr::summarise(
+      total_enr = sum(.data$ENROLLMENT_NUM, na.rm = TRUE),
+      .groups = "drop"
+    )
+
+  # Map ethnicity to TAPR column name and filter to known groups
+  df$tapr_col <- eth_map[df$ETHNICITY]
+  df_mapped <- df[!is.na(df$tapr_col), ]
+
+  # Determine which reference columns are available
+  ref_cols <- intersect(
+    c("REGION", "COUNTY NAME", "DISTRICT", "DISTRICT NAME",
+      "CAMPUS", "CAMPUS NAME", "CHARTER STATUS"),
+    names(df_mapped)
+  )
+
+  # Get unique reference info per entity
+  ref_info <- df_mapped |>
+    dplyr::select(dplyr::all_of(ref_cols)) |>
+    dplyr::distinct()
+
+  # Pivot ethnicity counts to wide
+  wide_eth <- df_mapped |>
+    dplyr::select(dplyr::all_of(c(id_col, "tapr_col", "ENROLLMENT_NUM"))) |>
+    tidyr::pivot_wider(
+      id_cols = dplyr::all_of(id_col),
+      names_from = "tapr_col",
+      values_from = "ENROLLMENT_NUM",
+      values_fn = sum
+    )
+
+  # Add total column
+  total_col_name <- paste0(prefix, "PETALLC")
+  wide_eth <- dplyr::left_join(wide_eth, totals, by = id_col)
+  wide_eth[[total_col_name]] <- wide_eth$total_enr
+  wide_eth$total_enr <- NULL
+
+  # Join reference info
+  result <- dplyr::left_join(ref_info, wide_eth, by = id_col)
+
+  # Rename reference columns to match TAPR convention
+  rename_map <- c(
+    "COUNTY NAME" = "CNTYNAME",
+    "DISTRICT NAME" = "DISTNAME",
+    "CAMPUS NAME" = "CAMPNAME"
+  )
+
+  for (old_name in names(rename_map)) {
+    if (old_name %in% names(result)) {
+      names(result)[names(result) == old_name] <- rename_map[old_name]
+    }
+  }
+
+  # Convert charter status to Y/N flag
+  charter_col <- paste0(prefix, "FLCHART")
+  if ("CHARTER STATUS" %in% names(result)) {
+    result[[charter_col]] <- ifelse(
+      result[["CHARTER STATUS"]] == "OPEN ENROLLMENT CHARTER", "Y", "N"
+    )
+    result[["CHARTER STATUS"]] <- NULL
+  }
+
+  result
+}
+
+
+#' Pivot ad-hoc grade data to wide format matching TAPR columns
+#'
+#' @param df Long-format data frame from ad-hoc grade download
+#' @param sumlev "C" for campus, "D" for district
+#' @return Wide data frame with TAPR-compatible grade column names
+#' @keywords internal
+pivot_adhoc_grades <- function(df, sumlev) {
+
+  prefix <- sumlev  # "C" or "D"
+  id_col <- if (sumlev == "C") "CAMPUS" else "DISTRICT"
+
+  # Map ad-hoc grade names to TAPR column names
+  grade_map <- c(
+    "Early Education" = paste0(prefix, "PETGEEC"),
+    "Pre-kindergarten" = paste0(prefix, "PETGPKC"),
+    "Kindergarten" = paste0(prefix, "PETGKNC"),
+    "Grade 1" = paste0(prefix, "PETG01C"),
+    "Grade 2" = paste0(prefix, "PETG02C"),
+    "Grade 3" = paste0(prefix, "PETG03C"),
+    "Grade 4" = paste0(prefix, "PETG04C"),
+    "Grade 5" = paste0(prefix, "PETG05C"),
+    "Grade 6" = paste0(prefix, "PETG06C"),
+    "Grade 7" = paste0(prefix, "PETG07C"),
+    "Grade 8" = paste0(prefix, "PETG08C"),
+    "Grade 9" = paste0(prefix, "PETG09C"),
+    "Grade 10" = paste0(prefix, "PETG10C"),
+    "Grade 11" = paste0(prefix, "PETG11C"),
+    "Grade 12" = paste0(prefix, "PETG12C")
+  )
+
+  # Clean enrollment values
+  df$ENROLLMENT_NUM <- suppressWarnings(as.numeric(
+    gsub("[^0-9.-]", "", df$ENROLLMENT)
+  ))
+
+  # Map grade to TAPR column name
+  df$tapr_col <- grade_map[df$GRADE]
+  df_mapped <- df[!is.na(df$tapr_col), ]
+
+  # Pivot to wide
+  wide_grade <- df_mapped |>
+    dplyr::select(dplyr::all_of(c(id_col, "tapr_col", "ENROLLMENT_NUM"))) |>
+    tidyr::pivot_wider(
+      id_cols = dplyr::all_of(id_col),
+      names_from = "tapr_col",
+      values_from = "ENROLLMENT_NUM",
+      values_fn = sum
+    )
+
+  wide_grade
 }
 
 

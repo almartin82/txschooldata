@@ -17,7 +17,7 @@ test_that("safe_numeric handles various inputs", {
 })
 
 test_that("fetch_enr validates year parameter", {
-  # Year 1996 is before valid range (1997-2025)
+  # Year 1996 is before valid range (1997-2026)
   expect_error(fetch_enr(1996), "end_year must be between")
   # Year 2030 is after valid range
   expect_error(fetch_enr(2030), "end_year must be between")
