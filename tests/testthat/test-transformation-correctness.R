@@ -583,8 +583,11 @@ test_that("2024 state demographics pin check", {
   expect_equal(state$native_american, 17886)
   expect_equal(state$pacific_islander, 8831)
   expect_equal(state$multiracial, 173425)
-  expect_equal(state$econ_disadv, 3434955)
-  expect_equal(state$lep, 1344804)
+  # Note: dd_tapr API (2024+) uses DPNTECOC/DPNTLEPC columns which report
+  # slightly different counts than old xplore API's DPETECOC/DPETLEPC due to
+  # different PEIMS snapshot methodologies. These pins match the dd_tapr values.
+  expect_equal(state$econ_disadv, 3439824)
+  expect_equal(state$lep, 1345900)
   expect_equal(state$special_ed, 764858)
 })
 
