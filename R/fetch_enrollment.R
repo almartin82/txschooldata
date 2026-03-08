@@ -54,13 +54,25 @@ fetch_enr <- function(end_year, tidy = TRUE, use_cache = TRUE) {
     return(read_cache(end_year, cache_type))
   }
 
-  # For TAPR years where old API is dead (2013-2023), use bundled data
-  if (end_year >= 2013 && end_year <= 2023) {
-    result <- read_bundled_enr(end_year, cache_type)
-    if (use_cache) {
-      write_cache(result, end_year, cache_type)
+  # For years where old APIs are dead (2003-2023), use bundled data if available.
+
+  # TEA decommissioned both the AEIS xplore/getdata.sas endpoint (2003-2012)
+
+  # and the TAPR xplore/getdata.sas endpoint (2013-2023). Bundled data is the
+  # only reliable source for these years.
+  if (end_year >= 2003 && end_year <= 2023) {
+    bundled <- tryCatch(
+      read_bundled_enr(end_year, cache_type),
+      error = function(e) NULL
+    )
+    if (!is.null(bundled)) {
+      if (use_cache) {
+        write_cache(bundled, end_year, cache_type)
+      }
+      return(bundled)
     }
-    return(result)
+    # No bundled data — fall through to live download attempt.
+    # For AEIS years (2003-2012) this will likely fail since the API is dead.
   }
 
   # Get raw data from TEA

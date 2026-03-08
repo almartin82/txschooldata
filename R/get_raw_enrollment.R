@@ -200,13 +200,12 @@ download_aeis_file <- function(end_year, dsname, keys, id_param) {
       stop(paste("HTTP error:", httr::status_code(response)))
     }
 
-    # Check for error page
-    file_info <- file.info(tname)
-    if (file_info$size < 500) {
-      content <- readLines(tname, n = 10, warn = FALSE)
-      if (any(grepl("error|completed with errors", content, ignore.case = TRUE))) {
-        stop(paste("SAS broker returned an error for", dsname, "year", end_year))
-      }
+    # Check for error page (HTML response instead of CSV)
+    first_lines <- readLines(tname, n = 10, warn = FALSE)
+    if (any(grepl("<!DOCTYPE|<html|<HTML|completed with errors", first_lines, ignore.case = TRUE))) {
+      stop(paste("AEIS SAS broker returned an HTML error page for", dsname,
+                 "year", end_year,
+                 "- the xplore/getdata.sas endpoint may be decommissioned"))
     }
 
   }, error = function(e) {
