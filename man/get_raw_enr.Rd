@@ -7,7 +7,7 @@
 get_raw_enr(end_year)
 }
 \arguments{
-\item{end_year}{School year end (2023-24 = 2024)}
+\item{end_year}{School year end (e.g., 2023-24 = 2024). Valid range: 1997-2026.}
 }
 \value{
 List with campus and district data frames

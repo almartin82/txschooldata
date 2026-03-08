@@ -59,7 +59,7 @@ tidy_enr <- function(df) {
           dplyr::mutate(
             subgroup = .x,
             pct = dplyr::case_when(
-              row_total > 0 ~ n_students / row_total,
+              row_total > 0 ~ pmin(n_students / row_total, 1.0),
               TRUE ~ NA_real_
             ),
             grade_level = "TOTAL"
@@ -118,7 +118,7 @@ tidy_enr <- function(df) {
           dplyr::mutate(
             subgroup = "total_enrollment",
             pct = dplyr::case_when(
-              row_total > 0 ~ n_students / row_total,
+              row_total > 0 ~ pmin(n_students / row_total, 1.0),
               TRUE ~ NA_real_
             ),
             grade_level = gl

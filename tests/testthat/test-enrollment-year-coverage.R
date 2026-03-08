@@ -401,7 +401,7 @@ test_that("Multiracial and pacific_islander present from 2011 onward", {
 
 test_that("fetch_enr rejects out-of-range years", {
   expect_error(fetch_enr(1996), "end_year must be between")
-  expect_error(fetch_enr(2026), "end_year must be between")
+  expect_error(fetch_enr(2027), "end_year must be between")
 })
 
 test_that("District count is stable across years", {
